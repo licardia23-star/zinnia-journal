@@ -248,6 +248,10 @@ input[type=range]{width:100%;accent-color:var(--g2)}
   <!-- 달력 -->
   <div id="home-cal-months"></div>
 
+  <!-- 임시 디버그 버튼 -->
+  <div id="debug-area" style="margin-top:8px;padding:8px;background:#fff3;border-radius:8px;font-size:11px;display:none"></div>
+  <button onclick="debugStorage()" style="width:100%;margin-top:8px;padding:8px;background:#888;color:#fff;border:none;border-radius:8px;font-size:12px;cursor:pointer">🔍 저장 상태 확인</button>
+
   <!-- 하단 버튼 -->
   <div style="display:flex;gap:12px;margin-top:1rem">
     <div class="card" style="flex:1" onclick="go('s-album')">
@@ -692,7 +696,33 @@ function buildDayList(){
 }
 function openShareDetail(di){curDi=di;var dd=DAY_DATES[di],ds='2026년 3월 '+dd.d+'일 ('+DAYS[di].split('(')[1].replace(')','')+')';document.getElementById('share-detail-title').innerText='3월 '+dd.d+'일 공유';document.getElementById('sc-date').innerText=ds;document.getElementById('sc-sub').innerText='관찰 '+(di+1)+'일차 · 실내온도 22°C · 햇빛 보통';document.getElementById('sc-summary').innerText=makeSummary(di);var gNm=['무비료','액체비료','고체비료'],gBg=['#f7f7f6','#f0f7ff','#fffaf0'],gBd=['#1D9E75','#378ADD','#BA7517'],gNc=['#27500A','#0C447C','#633806'],gH='';[1,2,3].forEach(function(g,gi){var avg=calcDayAvg(g,di),st=calcDayState(g,di);var lT=Object.keys(st.leafMap).map(function(k){return k+' '+st.leafMap[k];}).join('·'),fT=st.flower['개화']>0?'개화 '+st.flower['개화']+'개!':st.flower['꽃봉오리']>0?'꽃봉오리 '+st.flower['꽃봉오리']+'개!':'';gH+='<div class="grp-row" style="background:'+gBg[gi]+';border-left:3px solid '+gBd[gi]+'"><div><div class="grp-name" style="color:'+gNc[gi]+'">그룹 '+g+' · '+gNm[gi]+'</div><div class="grp-sub">'+(fT||'잎 상태: '+lT)+'</div></div><div class="grp-val">'+avg.avgH+'<span style="font-size:11px;font-weight:400;color:#888">cm</span><div class="grp-val-sub">잎 '+avg.avgL+'개 평균</div></div></div>';});document.getElementById('sc-groups').innerHTML=gH;document.getElementById('pc-date').innerText=ds;var rows=[['1-1-a','2-1-a','3-1-a'],['1-1-b','2-1-b','3-1-b'],['1-2-a','2-2-a','3-2-a'],['1-2-b','2-2-b','3-2-b']],pgH='';rows.forEach(function(row){row.forEach(function(p){var d=DB[p][di];pgH+=d.photo?'<div class="photo-cell" style="padding:0"><img src="'+d.photo+'" style="width:100%;height:100%;object-fit:cover;border-radius:6px"></div>':'<div class="photo-cell"><div style="font-size:14px;color:#ccc">+</div><div>'+p+'</div></div>';});});document.getElementById('photo-grid').innerHTML=pgH;switchTab('summary');go('s-share-detail');}
 function switchTab(t){document.getElementById('tab-summary').classList.toggle('on',t==='summary');document.getElementById('tab-photo').classList.toggle('on',t==='photo');document.getElementById('view-summary').style.display=t==='summary'?'block':'none';document.getElementById('view-photo').style.display=t==='photo'?'block':'none';}
-function copyText(){var di=curDi,dd=DAY_DATES[di],gNm=['무비료','액체비료','고체비료'],avgs=[1,2,3].map(function(g){return calcDayAvg(g,di);}),sts=[1,2,3].map(function(g){return calcDayState(g,di);});var lines=['🌱 백일홍 관찰 일지 - 2026년 3월 '+dd.d+'일 (관찰 '+(di+1)+'일차)','─────────────────────','📋 오늘의 요약',makeSummary(di),'','📊 그룹별 현황'];[0,1,2].forEach(function(gi){var avg=avgs[gi],st=sts[gi],lT=Object.keys(st.leafMap).map(function(k){return k+' '+st.leafMap[k];}).join('·'),fT=st.flower['꽃봉오리']>0?' · 꽃봉오리 '+st.flower['꽃봉오리']+'개':st.flower['개화']>0?' · 개화 '+st.flower['개화']+'개':'';lines.push('그룹'+(gi+1)+' ('+gNm[gi]+'): 평균 키 '+avg.avgH+'cm · 잎 '+avg.avgL+'개'+fT+' · 잎상태 '+lT);});lines.push('─────────────────────','백일홍 비료 실험 관찰 일지');navigator.clipboard.writeText(lines.join('\n')).then(function(){var m=document.getElementById('copy-msg');m.style.display='block';setTimeout(function(){m.style.display='none';},2500);});}
+function copyText(){var di=curDi,dd=DAY_DATES[di],gNm=['무비료','액체비료','고체비료'],avgs=[1,2,3].map(function(g){return calcDayAvg(g,di);}),sts=[1,2,3].map(function(g){return calcDayState(g,di);});var lines=['🌱 백일홍 관찰 일지 - 2026년 3월 '+dd.d+'일 (관찰 '+(di+1)+'일차)','─────────────────────','📋 오늘의 요약',makeSummary(di),'','📊 그룹별 현황'];[0,1,2].forEach(function(gi){var avg=avgs[gi],st=sts[gi],lT=Object.keys(st.leafMap).map(function(k){return k+' '+st.leafMap[k];}).join('·'),fT=st.flower['꽃봉오리']>0?' · 꽃봉오리 '+st.flower['꽃봉오리']+'개':st.flower['개화']>0?' · 개화 '+st.flower['개화']+'개':'';lines.push('그룹'+(gi+1)+' ('+gNm[gi]+'): 평균 키 '+avg.avgH+'cm · 잎 '+avg.avgL+'개'+fT+' · 잎상태 '+lT);});lines.push('─────────────────────','백일홍 비료 실험 관찰 일지');navigator.clipboard.writeText(lines.join('\n')).then(function(){var m=document.getElementById('copy-msg');m.style.display='block';function debugStorage(){
+  var area = document.getElementById('debug-area');
+  area.style.display='block';
+  var raw = localStorage.getItem('zinnia_db');
+  if(!raw){
+    area.textContent = '❌ localStorage 비어있음 - 저장 안 됨';
+    area.style.background='#fee';
+    return;
+  }
+  try {
+    var data = JSON.parse(raw);
+    var dbKeys = Object.keys(data.DB||{});
+    var recCount = 0;
+    dbKeys.forEach(function(p){
+      Object.keys(data.DB[p]).forEach(function(di){
+        if(data.DB[p][di].height !== null) recCount++;
+      });
+    });
+    area.textContent = '✅ 저장됨! 식물수:'+dbKeys.length+' 기록수:'+recCount+' 날짜수:'+(data.DAY_DATES||[]).length;
+    area.style.background='#efe';
+  } catch(e) {
+    area.textContent = '⚠️ 파싱 오류: '+e.message;
+    area.style.background='#ffe';
+  }
+}
+
+setTimeout(function(){m.style.display='none';},2500);});}
 function go(id){document.querySelectorAll('.screen').forEach(function(s){s.classList.remove('active');});document.getElementById(id).classList.add('active');if(id==='s-cal'||id==='s-home')renderMainCal(id);}
 function sel(btn,g){btn.closest('.sgrp').querySelectorAll('.sbtn').forEach(function(b){b.classList.remove('on');});btn.classList.add('on');}
 function setW(t){document.getElementById('wno').classList.toggle('on',t==='no');document.getElementById('wyes').classList.toggle('on',t==='yes');document.getElementById('spray').style.display=t==='yes'?'flex':'none';}
