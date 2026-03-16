@@ -229,14 +229,7 @@ input[type=range]{width:100%;accent-color:var(--g2)}
     });
   };
 
-  /* 페이지 로드시 데이터 불러오기 */
-  window.addEventListener("load", function() {
-    setTimeout(function(){
-      window.loadFromStorage();
-      if(typeof renderMainCal === "function") renderMainCal("s-home");
-      if(typeof buildDayList === "function") buildDayList();
-    }, 200);
-  });
+  /* loadFromStorage는 메인 JS 초기화 완료 후 호출됨 */
 </script>
 </head>
 <body>
@@ -801,7 +794,17 @@ function rebuildWeeks() {
 }
 function setWkGrp(g){curWkGrp=g;var nm=g==1?'무비료':g==2?'액체비료':'고체비료';document.getElementById('wkgrp-title').innerText='그룹 '+g+' ('+nm+') 분석';renderWeekList('week-list',g,'s-wk-detail','wkdetail-title','wk-detail-body');}
 document.getElementById('today-lbl').innerText=(function(){var d=new Date();return d.getFullYear()+'년 '+(d.getMonth()+1)+'월 '+d.getDate()+'일';})();
-setTimeout(function(){var now=new Date();calViewMonth=now.getMonth()+1;calViewYear=now.getFullYear();renderWeekList('total-week-list',null,'s-wk-total-detail','total-detail-title','total-detail-body');buildDayList();initObsDate();renderMainCal('s-home');},100);
+setTimeout(function(){
+  var now=new Date();
+  calViewMonth=now.getMonth()+1;
+  calViewYear=now.getFullYear();
+  /* localStorage에서 데이터 불러오기 - 모든 함수 정의 완료 후 */
+  if(window.loadFromStorage) window.loadFromStorage();
+  renderWeekList('total-week-list',null,'s-wk-total-detail','total-detail-title','total-detail-body');
+  buildDayList();
+  initObsDate();
+  renderMainCal('s-home');
+},100);
 
 /* ── 관찰 기록 날짜 선택 ── */
 var obsDateIdx = 6; /* 기본: 마지막 날(3/16) */
