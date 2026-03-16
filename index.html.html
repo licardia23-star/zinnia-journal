@@ -194,8 +194,9 @@ input[type=range]{width:100%;accent-color:var(--g2)}
       if(data.DB) {
         Object.keys(data.DB).forEach(function(p){
           DB[p] = {};
-          Object.keys(data.DB[p]).forEach(function(di){
-            DB[p][parseInt(di)] = data.DB[p][di];
+          Object.keys(data.DB[p]).forEach(function(dk){
+            /* dk는 "3_16" 형태 또는 숫자 인덱스(구버전 호환) */
+            DB[p][dk] = data.DB[p][dk];
           });
         });
       }
@@ -371,20 +372,25 @@ PLANTS.forEach(function(p){DB[p]={};});
 
 function calcDayAvg(g,di){
   var pts=grpPlants(g),h=0,l=0,cnt=0;
+  var dd=DAY_DATES[di];
+  var dk=dd?dd.m+'_'+dd.d:String(di);
   pts.forEach(function(p){
-    if(DB[p]&&DB[p][di]&&DB[p][di].height!==null){h+=DB[p][di].height;l+=DB[p][di].leafCount;cnt++;}
+    var rec=DB[p]&&(DB[p][dk]||DB[p][di]);
+    if(rec&&rec.height!==null){h+=rec.height;l+=rec.leafCount||0;cnt++;}
   });
   if(cnt===0) return{avgH:0,avgL:0};
   return{avgH:Math.round(h/cnt*10)/10,avgL:Math.round(l/cnt*10)/10};
 }
 function calcDayState(g,di){
   var pts=grpPlants(g),lm={},sm={},fm={없음:0,꽃봉오리:0,개화:0};
+  var dd=DAY_DATES[di];
+  var dk=dd?dd.m+'_'+dd.d:String(di);
   pts.forEach(function(p){
-    if(!DB[p]||!DB[p][di]||DB[p][di].height===null) return;
-    var d=DB[p][di];
-    if(d.leafState){lm[d.leafState]=(lm[d.leafState]||0)+1;}
-    if(d.stemState){sm[d.stemState]=(sm[d.stemState]||0)+1;}
-    if(d.flowerState){fm[d.flowerState]=(fm[d.flowerState]||0)+1;}
+    var rec=DB[p]&&(DB[p][dk]||DB[p][di]);
+    if(!rec||rec.height===null) return;
+    if(rec.leafState){lm[rec.leafState]=(lm[rec.leafState]||0)+1;}
+    if(rec.stemState){sm[rec.stemState]=(sm[rec.stemState]||0)+1;}
+    if(rec.flowerState){fm[rec.flowerState]=(fm[rec.flowerState]||0)+1;}
   });
   return{leafMap:lm,stemMap:sm,flower:fm};
 }
@@ -698,28 +704,23 @@ function openShareDetail(di){curDi=di;var dd=DAY_DATES[di],ds='2026년 3월 '+dd
 function switchTab(t){document.getElementById('tab-summary').classList.toggle('on',t==='summary');document.getElementById('tab-photo').classList.toggle('on',t==='photo');document.getElementById('view-summary').style.display=t==='summary'?'block':'none';document.getElementById('view-photo').style.display=t==='photo'?'block':'none';}
 function copyText(){var di=curDi,dd=DAY_DATES[di],gNm=['무비료','액체비료','고체비료'],avgs=[1,2,3].map(function(g){return calcDayAvg(g,di);}),sts=[1,2,3].map(function(g){return calcDayState(g,di);});var lines=['🌱 백일홍 관찰 일지 - 2026년 3월 '+dd.d+'일 (관찰 '+(di+1)+'일차)','─────────────────────','📋 오늘의 요약',makeSummary(di),'','📊 그룹별 현황'];[0,1,2].forEach(function(gi){var avg=avgs[gi],st=sts[gi],lT=Object.keys(st.leafMap).map(function(k){return k+' '+st.leafMap[k];}).join('·'),fT=st.flower['꽃봉오리']>0?' · 꽃봉오리 '+st.flower['꽃봉오리']+'개':st.flower['개화']>0?' · 개화 '+st.flower['개화']+'개':'';lines.push('그룹'+(gi+1)+' ('+gNm[gi]+'): 평균 키 '+avg.avgH+'cm · 잎 '+avg.avgL+'개'+fT+' · 잎상태 '+lT);});lines.push('─────────────────────','백일홍 비료 실험 관찰 일지');navigator.clipboard.writeText(lines.join('\n')).then(function(){var m=document.getElementById('copy-msg');m.style.display='block';function debugStorage(){
   var area = document.getElementById('debug-area');
+  if(!area){alert('debug-area 없음');return;}
   area.style.display='block';
   var raw = localStorage.getItem('zinnia_db');
   if(!raw){
-    area.textContent = '❌ localStorage 비어있음 - 저장 안 됨';
-    area.style.background='#fee';
+    area.innerHTML='<span style="color:red">❌ 저장 안됨</span>';
     return;
   }
-  try {
-    var data = JSON.parse(raw);
-    var dbKeys = Object.keys(data.DB||{});
-    var recCount = 0;
-    dbKeys.forEach(function(p){
-      Object.keys(data.DB[p]).forEach(function(di){
-        if(data.DB[p][di].height !== null) recCount++;
+  try{
+    var data=JSON.parse(raw);
+    var cnt=0;
+    Object.keys(data.DB||{}).forEach(function(p){
+      Object.keys(data.DB[p]).forEach(function(dk){
+        if(data.DB[p][dk]&&data.DB[p][dk].height!==null)cnt++;
       });
     });
-    area.textContent = '✅ 저장됨! 식물수:'+dbKeys.length+' 기록수:'+recCount+' 날짜수:'+(data.DAY_DATES||[]).length;
-    area.style.background='#efe';
-  } catch(e) {
-    area.textContent = '⚠️ 파싱 오류: '+e.message;
-    area.style.background='#ffe';
-  }
+    area.innerHTML='<span style="color:green">✅ 저장됨! 날짜:'+(data.DAY_DATES||[]).length+'개 기록:'+cnt+'개</span>';
+  }catch(e){area.innerHTML='<span style="color:orange">⚠️ '+e.message+'</span>';}
 }
 
 setTimeout(function(){m.style.display='none';},2500);});}
@@ -727,9 +728,42 @@ function go(id){document.querySelectorAll('.screen').forEach(function(s){s.class
 function sel(btn,g){btn.closest('.sgrp').querySelectorAll('.sbtn').forEach(function(b){b.classList.remove('on');});btn.classList.add('on');}
 function setW(t){document.getElementById('wno').classList.toggle('on',t==='no');document.getElementById('wyes').classList.toggle('on',t==='yes');document.getElementById('spray').style.display=t==='yes'?'flex':'none';}
 function setPot(pot,grp,back){curPot=pot;curGroup=grp;document.getElementById('pot-title').innerText='화분 '+pot.split('-')[1]+' · '+grp;document.getElementById('pa-name').innerText=pot+'-a';document.getElementById('pb-name').innerText=pot+'-b';document.getElementById('pot-back').onclick=function(){go(back);};}
-function setPlant(ab){curPlantAB=ab;var key=curPot+'-'+ab;document.getElementById('plant-title').innerText=key+' 기록';var d=DB[key]?DB[key][obsDateIdx]:null;if(d){document.getElementById('p-height').value=d.height;document.getElementById('leaf-sl').value=Math.min(d.leafCount,10);document.getElementById('leaf-v').innerText=Math.min(d.leafCount,10);document.querySelectorAll('#sg-leaf .sbtn').forEach(function(b){b.classList.toggle('on',b.innerText===d.leafState);});document.querySelectorAll('#sg-stem .sbtn').forEach(function(b){b.classList.toggle('on',b.innerText===d.stemState);});document.querySelectorAll('#sg-flower .sbtn').forEach(function(b){b.classList.toggle('on',b.innerText===d.flowerState);});}}
+function setPlant(ab){curPlantAB=ab;var key=curPot+'-'+ab;document.getElementById('plant-title').innerText=key+' 기록';var d=DB[key]?DB[key][obsDateIdx]:null;if(d){document.getElementById('p-height').value=d.height;var lc=d.leafCount!=null?d.leafCount:0;document.getElementById('leaf-sl').value=Math.min(lc,10);document.getElementById('leaf-v').innerText=Math.min(lc,10);document.querySelectorAll('#sg-leaf .sbtn').forEach(function(b){b.classList.toggle('on',b.innerText===d.leafState);});document.querySelectorAll('#sg-stem .sbtn').forEach(function(b){b.classList.toggle('on',b.innerText===d.stemState);});document.querySelectorAll('#sg-flower .sbtn').forEach(function(b){b.classList.toggle('on',b.innerText===d.flowerState);});}}
 function toggleLeafOther(c){document.getElementById('leaf-other-in').style.display=c?'inline-block':'none';document.getElementById('leaf-sl').disabled=c;}
-function saveInput(){var key=curPot+'-'+curPlantAB;if(!key||key==='-')return;var di=obsDateIdx<0?0:obsDateIdx;var h=parseFloat(document.getElementById('p-height').value)||DB[key][di].height;var lc=document.getElementById('leaf-other').checked?parseInt(document.getElementById('leaf-other-in').value)||DB[key][di].leafCount:parseInt(document.getElementById('leaf-sl').value);var ls='정상',ss='정상',fs='없음';document.querySelectorAll('#sg-leaf .sbtn.on').forEach(function(b){ls=b.innerText;});document.querySelectorAll('#sg-stem .sbtn.on').forEach(function(b){ss=b.innerText;});document.querySelectorAll('#sg-flower .sbtn.on').forEach(function(b){fs=b.innerText;});DB[key][di]={height:h,leafCount:lc,leafState:ls,stemState:ss,flowerState:fs,photo:DB[key][di].photo};if(window.saveToStorage)window.saveToStorage();}
+function getDateKey(){
+  if(curObsDate&&curObsDate.m&&curObsDate.d) return curObsDate.m+'_'+curObsDate.d;
+  var now=new Date(); return (now.getMonth()+1)+'_'+now.getDate();
+}
+function saveInput(){
+  var key=curPot+'-'+curPlantAB;
+  if(!key||key==='-') return;
+  var dk=getDateKey();
+  if(!DB[key]) DB[key]={};
+  var prev=DB[key][dk]||{};
+  var h=parseFloat(document.getElementById('p-height').value)||prev.height||null;
+  var lc=document.getElementById('leaf-other').checked?
+    parseInt(document.getElementById('leaf-other-in').value)||prev.leafCount||0:
+    parseInt(document.getElementById('leaf-sl').value);
+  var ls='정상',ss='정상',fs='없음';
+  document.querySelectorAll('#sg-leaf .sbtn.on').forEach(function(b){ls=b.innerText;});
+  document.querySelectorAll('#sg-stem .sbtn.on').forEach(function(b){ss=b.innerText;});
+  document.querySelectorAll('#sg-flower .sbtn.on').forEach(function(b){fs=b.innerText;});
+  DB[key][dk]={height:h,leafCount:lc,leafState:ls,stemState:ss,flowerState:fs,
+    photo:prev.photo||null,dateM:curObsDate?curObsDate.m:null,dateD:curObsDate?curObsDate.d:null};
+  /* DAY_DATES에 날짜 등록 */
+  if(curObsDate&&curObsDate.m&&curObsDate.d){
+    var found=false;
+    DAY_DATES.forEach(function(dd){if(dd.m===curObsDate.m&&dd.d===curObsDate.d)found=true;});
+    if(!found){
+      DAY_DATES.push({m:curObsDate.m,d:curObsDate.d});
+      DAY_DATES.sort(function(a,b){return a.m!==b.m?a.m-b.m:a.d-b.d;});
+      DAYS.length=0;
+      DAY_DATES.forEach(function(dd){DAYS.push(dd.m+'/'+dd.d);});
+      rebuildWeeks();
+    }
+  }
+  if(window.saveToStorage) window.saveToStorage();
+}
 function saveCommon(){
   var temp = document.getElementById('c-temp');
   var sunBtn = document.querySelector('#s-common .sbtn.on');
