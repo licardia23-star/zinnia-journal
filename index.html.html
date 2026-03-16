@@ -171,26 +171,43 @@ input[type=range]{width:100%;accent-color:var(--g2)}
   /* ── localStorage 저장 ── */
   window.saveToStorage = function() {
     try {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify({
-        DB: window.DB,
-        DAY_DATES: window.DAY_DATES,
-        DAYS: window.DAYS
-      }));
+      var saveData = {DB:{}, DAY_DATES: DAY_DATES.slice(), DAYS: DAYS.slice()};
+      /* DB 복사 */
+      Object.keys(DB).forEach(function(p){
+        saveData.DB[p]={};
+        Object.keys(DB[p]).forEach(function(di){
+          saveData.DB[p][di]=Object.assign({},DB[p][di]);
+        });
+      });
+      localStorage.setItem('zinnia_db', JSON.stringify(saveData));
+      console.log('저장완료 - 식물수:', Object.keys(DB).length, '날짜수:', DAY_DATES.length);
     } catch(e) { console.error("저장 실패:", e); }
   };
 
   /* ── localStorage 불러오기 ── */
   window.loadFromStorage = function() {
     try {
-      var saved = localStorage.getItem(STORAGE_KEY);
-      if(saved) {
-        var data = JSON.parse(saved);
-        if(data.DB) window.DB = data.DB;
-        if(data.DAY_DATES) window.DAY_DATES = data.DAY_DATES;
-        if(data.DAYS) window.DAYS = data.DAYS;
-        window.rebuildWeeks();
-        console.log("데이터 불러오기 완료");
+      var saved = localStorage.getItem('zinnia_db');
+      if(!saved) { console.log('저장된 데이터 없음'); return; }
+      var data = JSON.parse(saved);
+      /* DB 복원 */
+      if(data.DB) {
+        Object.keys(data.DB).forEach(function(p){
+          DB[p] = {};
+          Object.keys(data.DB[p]).forEach(function(di){
+            DB[p][parseInt(di)] = data.DB[p][di];
+          });
+        });
       }
+      /* DAY_DATES 복원 */
+      if(data.DAY_DATES && data.DAY_DATES.length > 0) {
+        DAY_DATES.length = 0;
+        data.DAY_DATES.forEach(function(d){ DAY_DATES.push(d); });
+        DAYS.length = 0;
+        DAY_DATES.forEach(function(dd){ DAYS.push(dd.m+'/'+dd.d); });
+      }
+      rebuildWeeks();
+      console.log('불러오기 완료 - 날짜수:', DAY_DATES.length);
     } catch(e) { console.error("불러오기 실패:", e); }
   };
 
@@ -214,8 +231,11 @@ input[type=range]{width:100%;accent-color:var(--g2)}
 
   /* 페이지 로드시 데이터 불러오기 */
   window.addEventListener("load", function() {
-    window.loadFromStorage();
-    if(typeof renderMainCal === "function") renderMainCal("s-home");
+    setTimeout(function(){
+      window.loadFromStorage();
+      if(typeof renderMainCal === "function") renderMainCal("s-home");
+      if(typeof buildDayList === "function") buildDayList();
+    }, 200);
   });
 </script>
 </head>
@@ -343,6 +363,8 @@ input[type=range]{width:100%;accent-color:var(--g2)}
 
 <script>
 var DB={},curPot='',curGroup='',curPlantAB='',curWkGrp=1,curAlbPlant='',curSort='new',curDi=0;
+/* window에 전역 노출 - localStorage 연동용 */
+window.DB=DB;
 var DAYS=[];
 var DAY_DATES=[];
 var WEEKS=[];
@@ -684,7 +706,7 @@ function setW(t){document.getElementById('wno').classList.toggle('on',t==='no');
 function setPot(pot,grp,back){curPot=pot;curGroup=grp;document.getElementById('pot-title').innerText='화분 '+pot.split('-')[1]+' · '+grp;document.getElementById('pa-name').innerText=pot+'-a';document.getElementById('pb-name').innerText=pot+'-b';document.getElementById('pot-back').onclick=function(){go(back);};}
 function setPlant(ab){curPlantAB=ab;var key=curPot+'-'+ab;document.getElementById('plant-title').innerText=key+' 기록';var d=DB[key]?DB[key][obsDateIdx]:null;if(d){document.getElementById('p-height').value=d.height;document.getElementById('leaf-sl').value=Math.min(d.leafCount,10);document.getElementById('leaf-v').innerText=Math.min(d.leafCount,10);document.querySelectorAll('#sg-leaf .sbtn').forEach(function(b){b.classList.toggle('on',b.innerText===d.leafState);});document.querySelectorAll('#sg-stem .sbtn').forEach(function(b){b.classList.toggle('on',b.innerText===d.stemState);});document.querySelectorAll('#sg-flower .sbtn').forEach(function(b){b.classList.toggle('on',b.innerText===d.flowerState);});}}
 function toggleLeafOther(c){document.getElementById('leaf-other-in').style.display=c?'inline-block':'none';document.getElementById('leaf-sl').disabled=c;}
-function saveInput(){var key=curPot+'-'+curPlantAB;if(!key||key==='-')return;var di=obsDateIdx<0?0:obsDateIdx;var h=parseFloat(document.getElementById('p-height').value)||DB[key][di].height;var lc=document.getElementById('leaf-other').checked?parseInt(document.getElementById('leaf-other-in').value)||DB[key][di].leafCount:parseInt(document.getElementById('leaf-sl').value);var ls='정상',ss='정상',fs='없음';document.querySelectorAll('#sg-leaf .sbtn.on').forEach(function(b){ls=b.innerText;});document.querySelectorAll('#sg-stem .sbtn.on').forEach(function(b){ss=b.innerText;});document.querySelectorAll('#sg-flower .sbtn.on').forEach(function(b){fs=b.innerText;});DB[key][di]={height:h,leafCount:lc,leafState:ls,stemState:ss,flowerState:fs,photo:DB[key][di].photo};}
+function saveInput(){var key=curPot+'-'+curPlantAB;if(!key||key==='-')return;var di=obsDateIdx<0?0:obsDateIdx;var h=parseFloat(document.getElementById('p-height').value)||DB[key][di].height;var lc=document.getElementById('leaf-other').checked?parseInt(document.getElementById('leaf-other-in').value)||DB[key][di].leafCount:parseInt(document.getElementById('leaf-sl').value);var ls='정상',ss='정상',fs='없음';document.querySelectorAll('#sg-leaf .sbtn.on').forEach(function(b){ls=b.innerText;});document.querySelectorAll('#sg-stem .sbtn.on').forEach(function(b){ss=b.innerText;});document.querySelectorAll('#sg-flower .sbtn.on').forEach(function(b){fs=b.innerText;});DB[key][di]={height:h,leafCount:lc,leafState:ls,stemState:ss,flowerState:fs,photo:DB[key][di].photo};if(window.saveToStorage)window.saveToStorage();}
 function saveCommon(){
   var temp = document.getElementById('c-temp');
   var sunBtn = document.querySelector('#s-common .sbtn.on');
@@ -730,6 +752,7 @@ function handlePhotoSelect(input) {
         if(!DB[key]) DB[key]={};
         if(!DB[key][di]) DB[key][di]={height:null,leafCount:null,leafState:null,stemState:null,flowerState:null,photo:null};
         DB[key][di].photo = url;
+        if(window.saveToStorage)window.saveToStorage();
         if(status) status.textContent = '사진 업로드 완료 ✓';
         showToast('사진 업로드 완료!');
       } else {
