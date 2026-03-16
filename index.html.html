@@ -162,83 +162,36 @@ input[type=range]{width:100%;accent-color:var(--g2)}
 .events-title{font-size:11px;font-weight:700;color:var(--tl);letter-spacing:.06em;text-transform:uppercase;margin-bottom:8px;display:flex;align-items:center;gap:6px}
 </style>
 
-<!-- Firebase SDK (compat version - no module needed) -->
-<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
 <script>
-  var firebaseConfig = {
-    apiKey: "AIzaSyAlBLZspISxJS3PmrY6CmE3KXTEPoT5cxs",
-    authDomain: "zinnia-journal.firebaseapp.com",
-    projectId: "zinnia-journal",
-    storageBucket: "zinnia-journal.firebasestorage.app",
-    messagingSenderId: "648400132065",
-    appId: "1:648400132065:web:8d3c3aaceb8be0b6a1e4a0"
-  };
-
-  firebase.initializeApp(firebaseConfig);
-  var db = firebase.firestore();
-
   var CLOUD_NAME = "djkq7xaxd";
   var UPLOAD_PRESET = "zinnia_unsigned";
+  var STORAGE_KEY = "zinnia_db";
+  var COMMON_KEY = "zinnia_common";
 
-  /* ── Firestore 식물기록 저장 ── */
-  window.saveToFirestore = function(plantKey, dayIdx, data) {
-    return db.collection("records").doc(plantKey + "_" + dayIdx).set(
-      Object.assign({plantKey: plantKey, dayIdx: dayIdx, updatedAt: new Date().toISOString()}, data)
-    ).then(function() {
-      console.log("저장 완료:", plantKey, dayIdx);
-      return true;
-    }).catch(function(e) {
-      console.error("저장 실패:", e);
-      return false;
-    });
+  /* ── localStorage 저장 ── */
+  window.saveToStorage = function() {
+    try {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify({
+        DB: window.DB,
+        DAY_DATES: window.DAY_DATES,
+        DAYS: window.DAYS
+      }));
+    } catch(e) { console.error("저장 실패:", e); }
   };
 
-  /* ── Firestore 공통기록 저장 ── */
-  window.saveCommonToFirestore = function(dayIdx, data) {
-    return db.collection("common").doc("day_" + dayIdx).set(
-      Object.assign({dayIdx: dayIdx, updatedAt: new Date().toISOString()}, data)
-    ).then(function() { return true; })
-    .catch(function(e) { console.error("공통기록 저장 실패:", e); return false; });
-  };
-
-  /* ── 전체 데이터 불러오기 ── */
-  window.loadAllFromFirestore = function() {
-    return db.collection("records").get().then(function(snap) {
-      snap.forEach(function(d) {
-        var data = d.data();
-        var p = data.plantKey;
-        var di = data.dayIdx;
-        if(p && di !== undefined) {
-          if(!window.DB[p]) window.DB[p] = {};
-          window.DB[p][di] = {
-            height: data.height || null,
-            leafCount: data.leafCount !== undefined ? data.leafCount : null,
-            leafState: data.leafState || null,
-            stemState: data.stemState || null,
-            flowerState: data.flowerState || null,
-            photo: data.photo || null
-          };
-          /* DAY_DATES / DAYS 자동 등록 */
-          if(data.dateM && data.dateD) {
-            var found = false;
-            window.DAY_DATES.forEach(function(dd) {
-              if(dd.m === data.dateM && dd.d === data.dateD) found = true;
-            });
-            if(!found) {
-              window.DAY_DATES.push({m: data.dateM, d: data.dateD});
-              window.DAY_DATES.sort(function(a,b) { return a.m !== b.m ? a.m - b.m : a.d - b.d; });
-              window.DAYS = window.DAY_DATES.map(function(dd) { return dd.m + "/" + dd.d; });
-            }
-          }
-        }
-      });
-      window.rebuildWeeks();
-      console.log("데이터 불러오기 완료, 레코드:", snap.size);
-      if(typeof renderMainCal === "function") renderMainCal("s-home");
-    }).catch(function(e) {
-      console.error("불러오기 실패:", e);
-    });
+  /* ── localStorage 불러오기 ── */
+  window.loadFromStorage = function() {
+    try {
+      var saved = localStorage.getItem(STORAGE_KEY);
+      if(saved) {
+        var data = JSON.parse(saved);
+        if(data.DB) window.DB = data.DB;
+        if(data.DAY_DATES) window.DAY_DATES = data.DAY_DATES;
+        if(data.DAYS) window.DAYS = data.DAYS;
+        window.rebuildWeeks();
+        console.log("데이터 불러오기 완료");
+      }
+    } catch(e) { console.error("불러오기 실패:", e); }
   };
 
   /* ── Cloudinary 사진 업로드 ── */
@@ -248,14 +201,10 @@ input[type=range]{width:100%;accent-color:var(--g2)}
     formData.append("upload_preset", UPLOAD_PRESET);
     formData.append("folder", "zinnia/" + plantKey);
     return fetch("https://api.cloudinary.com/v1_1/" + CLOUD_NAME + "/image/upload", {
-      method: "POST",
-      body: formData
+      method: "POST", body: formData
     }).then(function(res) { return res.json(); })
     .then(function(data) {
-      if(data.secure_url) {
-        console.log("사진 업로드 완료:", data.secure_url);
-        return data.secure_url;
-      }
+      if(data.secure_url) return data.secure_url;
       return null;
     }).catch(function(e) {
       console.error("사진 업로드 실패:", e);
@@ -265,9 +214,8 @@ input[type=range]{width:100%;accent-color:var(--g2)}
 
   /* 페이지 로드시 데이터 불러오기 */
   window.addEventListener("load", function() {
-    if(window.DB) {
-      window.loadAllFromFirestore();
-    }
+    window.loadFromStorage();
+    if(typeof renderMainCal === "function") renderMainCal("s-home");
   });
 </script>
 </head>
@@ -753,13 +701,12 @@ function saveCommon(){
     note: note?note.value:''
   };
   if(dd){ data.dateM=dd.m; data.dateD=dd.d; }
-  if(window.saveCommonToFirestore) {
-    window.saveCommonToFirestore(di, data).then(function(ok){
-      showToast(ok?'공통 기록 저장완료! ✓':'저장 실패. 다시 시도해주세요.');
-    });
-  } else {
-    showToast('저장되었어요! ✓');
-  }
+  try {
+    var commonSaved = JSON.parse(localStorage.getItem(COMMON_KEY)||'{}');
+    commonSaved['day_'+di] = data;
+    localStorage.setItem('zinnia_common', JSON.stringify(commonSaved));
+    showToast('공통 기록 저장완료! ✓');
+  } catch(e) { showToast('저장되었어요! ✓'); }
 }
 function handlePhotoSelect(input) {
   if(!input.files||!input.files[0]) return;
@@ -795,19 +742,9 @@ function handlePhotoSelect(input) {
 }
 function confirmSave(){
   saveInput();
-  var key = curPot+'-'+curPlantAB;
-  var di = obsDateIdx<0?0:obsDateIdx;
-  var dd = DAY_DATES[di];
-  if(window.saveToFirestore && key && key!=='-' && DB[key] && DB[key][di]) {
-    var saveData = Object.assign({}, DB[key][di]);
-    if(dd) { saveData.dateM = dd.m; saveData.dateD = dd.d; }
-    window.saveToFirestore(key, di, saveData).then(function(ok){
-      if(ok) showToast('저장되었어요! ✓');
-      else showToast('저장 실패. 다시 시도해주세요.');
-    });
-  } else {
-    showToast('저장되었어요! ✓');
-  }
+  window.saveToStorage();
+  renderMainCal('s-home');
+  showToast('저장되었어요! ✓');
 }
 
 function showToast(msg) {
@@ -872,6 +809,53 @@ function updateObsDateDisplay(){
     '관찰 ' + (obsDateIdx + 1) + '일차' + (isToday ? ' · 오늘' : '');
 
 }
+</script>
+
+<script>
+/* ── localStorage 자동 저장/불러오기 ── */
+var STORAGE_KEY = 'zinnia_db';
+var STORAGE_DATES_KEY = 'zinnia_dates';
+
+function saveAllToStorage() {
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(window.DB));
+    localStorage.setItem(STORAGE_DATES_KEY, JSON.stringify({
+      DAY_DATES: window.DAY_DATES,
+      DAYS: window.DAYS,
+      WEEKS: window.WEEKS
+    }));
+  } catch(e) {
+    console.error('저장 실패:', e);
+  }
+}
+
+function loadAllFromStorage() {
+  try {
+    var dbStr = localStorage.getItem(STORAGE_KEY);
+    var datesStr = localStorage.getItem(STORAGE_DATES_KEY);
+    if(dbStr) {
+      var saved = JSON.parse(dbStr);
+      Object.keys(saved).forEach(function(p) {
+        window.DB[p] = saved[p];
+      });
+    }
+    if(datesStr) {
+      var dates = JSON.parse(datesStr);
+      if(dates.DAY_DATES) window.DAY_DATES = dates.DAY_DATES;
+      if(dates.DAYS) window.DAYS = dates.DAYS;
+      if(dates.WEEKS) window.WEEKS = dates.WEEKS;
+    }
+    console.log('데이터 불러오기 완료');
+  } catch(e) {
+    console.error('불러오기 실패:', e);
+  }
+}
+
+/* 페이지 로드시 자동 불러오기 */
+window.addEventListener('load', function() {
+  loadAllFromStorage();
+  renderMainCal('s-home');
+});
 </script>
 </body>
 </html>
