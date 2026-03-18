@@ -333,11 +333,11 @@ input[type=range]{width:100%;accent-color:var(--g2)}
     <span id="obs-date-sub" style="font-size:12px;color:var(--text-light)"></span>
   </div>
   <div style="display:flex;flex-direction:column;gap:12px">
-    <div class="card" onclick="go('s-common')"><div style="display:flex;align-items:center;gap:10px"><div style="width:38px;height:38px;background:var(--g6);border:1px solid var(--bdl);border-radius:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0"><svg width="16" height="16" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="5" stroke="#854F0B" stroke-width="1.8"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42" stroke="#854F0B" stroke-width="1.8" stroke-linecap="round"/></svg></div><div><div class="ctitle">공통 기록</div><div class="csub">날씨·온도·물주기</div></div></div></div>
+    <div class="card" onclick="openCommon()"><div style="display:flex;align-items:center;gap:10px"><div style="width:38px;height:38px;background:var(--g6);border:1px solid var(--bdl);border-radius:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0"><svg width="16" height="16" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="5" stroke="#854F0B" stroke-width="1.8"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42" stroke="#854F0B" stroke-width="1.8" stroke-linecap="round"/></svg></div><div><div class="ctitle">공통 기록</div><div class="csub">날씨·온도·물주기</div></div></div></div>
     <div class="card" onclick="go('s-indiv')"><div style="display:flex;align-items:center;gap:10px"><div style="width:38px;height:38px;background:var(--g6);border:1px solid var(--bdl);border-radius:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0"><svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M17 8C8 10 5.9 16.17 3.82 19.34L5.71 21l1-1C8.7 21 18 21 21 12c-1 2-2 3-4 4 2-4 0-7-4-8z" stroke="#3B6D11" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></div><div><div class="ctitle">개별 기록</div><div class="csub">그룹별 식물 개별 기록</div></div></div></div>
   </div>
 </div>
-<div id="s-common" class="screen"><div class="hdr"><button class="back" onclick="go('s-obs')"><svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M19 12H5M12 5l-7 7 7 7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg> 관찰 기록</button><span class="ptitle">공통 기록</span></div><p style="font-size:12px;color:#888;margin-bottom:1.25rem" id="today-lbl"></p><div class="fsec"><label class="flabel"><svg width="16" height="16" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="5" stroke="#854F0B" stroke-width="1.8"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42" stroke="#854F0B" stroke-width="1.8" stroke-linecap="round"/></svg> 실내 온도 (°C)</label><input class="finput" type="number" placeholder="예: 22" style="width:140px"></div><div class="fsec"><label class="flabel"><svg width="16" height="16" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="5" stroke="#854F0B" stroke-width="1.8"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42" stroke="#854F0B" stroke-width="1.8" stroke-linecap="round"/></svg> 햇빛 조건</label><div class="sgrp"><button class="sbtn" onclick="sel(this,'sun')">강함</button><button class="sbtn" onclick="sel(this,'sun')">보통</button><button class="sbtn" onclick="sel(this,'sun')">약함</button></div></div><div class="fsec"><label class="flabel"><svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M12 2.69l5.66 5.66a8 8 0 11-11.31 0z" stroke="#185FA5" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg> 물 주기</label><div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap"><button class="sbtn" id="wno" onclick="setW('no')">안줌</button><button class="sbtn" id="wyes" onclick="setW('yes')">분무기로</button><div id="spray" style="display:none;align-items:center;gap:8px"><input type="range" min="1" max="10" value="3" id="spray-sl" oninput="document.getElementById('spray-v').innerText=this.value" style="width:100px"><span class="slval" id="spray-v">3</span><span style="font-size:13px;color:#888">번</span></div></div></div><div class="fsec"><label class="flabel">공통 특이사항</label><textarea class="finput" rows="3" placeholder="자유롭게 입력"></textarea></div><button class="savebtn" onclick="saveCommon()">저장</button></div>
+<div id="s-common" class="screen"><div class="hdr"><button class="back" onclick="go('s-obs')"><svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M19 12H5M12 5l-7 7 7 7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg> 관찰 기록</button><span class="ptitle">공통 기록</span></div><p style="font-size:12px;color:#888;margin-bottom:1.25rem" id="today-lbl"></p><div class="fsec"><label class="flabel"><svg width="16" height="16" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="5" stroke="#854F0B" stroke-width="1.8"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42" stroke="#854F0B" stroke-width="1.8" stroke-linecap="round"/></svg> 실내 온도 (°C)</label><input class="finput" type="number" placeholder="예: 22" style="width:140px" id="c-temp"></div><div class="fsec"><label class="flabel"><svg width="16" height="16" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="5" stroke="#854F0B" stroke-width="1.8"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42" stroke="#854F0B" stroke-width="1.8" stroke-linecap="round"/></svg> 햇빛 조건</label><div class="sgrp"><button class="sbtn" onclick="sel(this,'sun')">강함</button><button class="sbtn" onclick="sel(this,'sun')">보통</button><button class="sbtn" onclick="sel(this,'sun')">약함</button></div></div><div class="fsec"><label class="flabel"><svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M12 2.69l5.66 5.66a8 8 0 11-11.31 0z" stroke="#185FA5" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg> 물 주기</label><div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap"><button class="sbtn" id="wno" onclick="setW('no')">안줌</button><button class="sbtn" id="wyes" onclick="setW('yes')">분무기로</button><div id="spray" style="display:none;align-items:center;gap:8px"><input type="range" min="1" max="10" value="3" id="spray-sl" oninput="document.getElementById('spray-v').innerText=this.value" style="width:100px"><span class="slval" id="spray-v">3</span><span style="font-size:13px;color:#888">번</span></div></div></div><div class="fsec"><label class="flabel">공통 특이사항</label><textarea class="finput" rows="3" placeholder="자유롭게 입력" id="c-note"></textarea></div><button class="savebtn" onclick="saveCommon()">저장</button></div>
 <div id="s-indiv" class="screen"><div class="hdr"><button class="back" onclick="go('s-obs')"><svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M19 12H5M12 5l-7 7 7 7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg> 관찰 기록</button><span class="ptitle">개별 기록</span></div><p class="sec-label">그룹 선택</p><div style="display:flex;flex-direction:column;gap:12px"><div class="card" onclick="go('s-g1')"><div class="badge bg1">그룹 1</div><div class="ctitle">무비료</div><div class="csub">화분 2개 · 식물 4개</div></div><div class="card" onclick="go('s-g2')"><div class="badge bg2">그룹 2</div><div class="ctitle">액체비료</div><div class="csub">화분 2개 · 식물 4개</div></div><div class="card" onclick="go('s-g3')"><div class="badge bg3">그룹 3</div><div class="ctitle">고체비료</div><div class="csub">화분 2개 · 식물 4개</div></div></div></div>
 <div id="s-g1" class="screen"><div class="hdr"><button class="back" onclick="go('s-indiv')"><svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M19 12H5M12 5l-7 7 7 7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg> 개별 기록</button><span class="ptitle">그룹 1 · 무비료</span></div><div style="display:flex;flex-direction:column;gap:12px"><div class="card" onclick="go('s-pot');setPot('1-1','무비료','s-g1')"><div class="ctitle">화분 1</div><div style="display:grid;grid-template-columns:1fr 1fr;gap:4px;margin-top:8px"><span style="font-size:13px;color:#888">1-1-a</span><span style="font-size:13px;color:#888">1-1-b</span></div></div><div class="card" onclick="go('s-pot');setPot('1-2','무비료','s-g1')"><div class="ctitle">화분 2</div><div style="display:grid;grid-template-columns:1fr 1fr;gap:4px;margin-top:8px"><span style="font-size:13px;color:#888">1-2-a</span><span style="font-size:13px;color:#888">1-2-b</span></div></div></div></div>
 <div id="s-g2" class="screen"><div class="hdr"><button class="back" onclick="go('s-indiv')"><svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M19 12H5M12 5l-7 7 7 7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg> 개별 기록</button><span class="ptitle">그룹 2 · 액체비료</span></div><div style="display:flex;flex-direction:column;gap:12px"><div class="card" onclick="go('s-pot');setPot('2-1','액체비료','s-g2')"><div class="ctitle">화분 1</div><div style="display:grid;grid-template-columns:1fr 1fr;gap:4px;margin-top:8px"><span style="font-size:13px;color:#888">2-1-a</span><span style="font-size:13px;color:#888">2-1-b</span></div></div><div class="card" onclick="go('s-pot');setPot('2-2','액체비료','s-g2')"><div class="ctitle">화분 2</div><div style="display:grid;grid-template-columns:1fr 1fr;gap:4px;margin-top:8px"><span style="font-size:13px;color:#888">2-2-a</span><span style="font-size:13px;color:#888">2-2-b</span></div></div></div></div>
@@ -778,7 +778,7 @@ function go(id){document.querySelectorAll('.screen').forEach(function(s){s.class
 function sel(btn,g){btn.closest('.sgrp').querySelectorAll('.sbtn').forEach(function(b){b.classList.remove('on');});btn.classList.add('on');}
 function setW(t){document.getElementById('wno').classList.toggle('on',t==='no');document.getElementById('wyes').classList.toggle('on',t==='yes');document.getElementById('spray').style.display=t==='yes'?'flex':'none';}
 function setPot(pot,grp,back){curPot=pot;curGroup=grp;document.getElementById('pot-title').innerText='화분 '+pot.split('-')[1]+' · '+grp;document.getElementById('pa-name').innerText=pot+'-a';document.getElementById('pb-name').innerText=pot+'-b';document.getElementById('pot-back').onclick=function(){go(back);};}
-function setPlant(ab){curPlantAB=ab;var key=curPot+'-'+ab;document.getElementById('plant-title').innerText=key+' 기록';var d=DB[key]?DB[key][obsDateIdx]:null;if(d){document.getElementById('p-height').value=d.height;var lc=d.leafCount!=null?d.leafCount:0;document.getElementById('leaf-sl').value=Math.min(lc,10);document.getElementById('leaf-v').innerText=Math.min(lc,10);document.querySelectorAll('#sg-leaf .sbtn').forEach(function(b){b.classList.toggle('on',b.innerText===d.leafState);});document.querySelectorAll('#sg-stem .sbtn').forEach(function(b){b.classList.toggle('on',b.innerText===d.stemState);});document.querySelectorAll('#sg-flower .sbtn').forEach(function(b){b.classList.toggle('on',b.innerText===d.flowerState);});}}
+function setPlant(ab){curPlantAB=ab;var key=curPot+'-'+ab;document.getElementById('plant-title').innerText=key+' 기록';var dk=getDateKey();var d=DB[key]?(DB[key][dk]||DB[key][obsDateIdx]):null;if(d){document.getElementById('p-height').value=d.height||'';var lc=d.leafCount!=null?d.leafCount:0;document.getElementById('leaf-sl').value=Math.min(lc,10);document.getElementById('leaf-v').innerText=Math.min(lc,10);document.querySelectorAll('#sg-leaf .sbtn').forEach(function(b){b.classList.toggle('on',b.innerText===d.leafState);});document.querySelectorAll('#sg-stem .sbtn').forEach(function(b){b.classList.toggle('on',b.innerText===d.stemState);});document.querySelectorAll('#sg-flower .sbtn').forEach(function(b){b.classList.toggle('on',b.innerText===d.flowerState);});if(d.photo){var prev=document.getElementById('photo-preview');var img=document.getElementById('photo-preview-img');if(prev&&img){prev.style.display='block';img.src=d.photo;}}document.getElementById('p-note').value=d.note||'';}else{document.getElementById('p-height').value='';document.getElementById('leaf-sl').value=0;document.getElementById('leaf-v').innerText='0';document.querySelectorAll('#sg-leaf .sbtn, #sg-stem .sbtn, #sg-flower .sbtn').forEach(function(b){b.classList.remove('on');});document.getElementById('photo-preview').style.display='none';document.getElementById('p-note').value='';}}
 function toggleLeafOther(c){document.getElementById('leaf-other-in').style.display=c?'inline-block':'none';document.getElementById('leaf-sl').disabled=c;}
 function getDateKey(){
   if(curObsDate&&curObsDate.m&&curObsDate.d) return curObsDate.m+'_'+curObsDate.d;
@@ -813,6 +813,53 @@ function saveInput(){
     }
   }
   if(window.saveToStorage) window.saveToStorage();
+}
+function openCommon(){
+  /* 공통 기록 화면 열기 + 저장된 데이터 불러오기 */
+  go('s-common');
+  var di = obsDateIdx<0?0:obsDateIdx;
+  var dd = DAY_DATES[di];
+  var dateKey = dd ? dd.m+'_'+dd.d : 'day_'+di;
+  /* localStorage에서 먼저 로드 */
+  try {
+    var commonSaved = JSON.parse(localStorage.getItem(COMMON_KEY)||'{}');
+    var saved = commonSaved['day_'+di];
+    if(saved) fillCommonForm(saved);
+  } catch(e){}
+  /* Firestore에서도 로드 (최신 데이터 덮어쓰기) */
+  fsdb.collection('common').doc(dateKey).get().then(function(doc){
+    if(doc.exists) fillCommonForm(doc.data());
+  }).catch(function(e){ console.log('공통기록 Firestore 로드 실패:', e); });
+}
+function fillCommonForm(data){
+  if(!data) return;
+  var temp = document.getElementById('c-temp');
+  if(temp && data.temp) temp.value = data.temp;
+  /* 햇빛 버튼 */
+  if(data.sun){
+    document.querySelectorAll('#s-common .sgrp').forEach(function(grp,gi){
+      if(gi===0){ /* 첫 번째 sgrp = 햇빛 */
+        grp.querySelectorAll('.sbtn').forEach(function(b){
+          b.classList.toggle('on', b.innerText===data.sun);
+        });
+      }
+    });
+  }
+  /* 물주기 */
+  if(data.water){
+    if(data.water==='안줌'){ setW('no'); }
+    else {
+      setW('yes');
+      var match = data.water.match(/(\d+)/);
+      if(match){
+        document.getElementById('spray-sl').value = match[1];
+        document.getElementById('spray-v').innerText = match[1];
+      }
+    }
+  }
+  /* 특이사항 */
+  var note = document.getElementById('c-note');
+  if(note && data.note) note.value = data.note;
 }
 function saveCommon(){
   var temp = document.getElementById('c-temp');
