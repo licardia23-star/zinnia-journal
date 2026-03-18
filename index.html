@@ -1,0 +1,980 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>백일홍 관찰일지</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;600;700&display=swap');
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --g1:#1a6b3c;--g2:#2d9b5f;--g3:#4ab87a;--g4:#a8dbb8;--g5:#d4edda;--g6:#eaf7ee;--gbg:#f2faf5;
+  --tx:#1c2b22;--ts:#4a6354;--tl:#7a9688;
+  --bd:#c8e4d0;--bdl:#dff0e6;
+  --pk1:#c2426a;--pk2:#e07898;--pk3:#fde8ef;
+  --yw:#f5c53a;--shadow:0 2px 12px rgba(26,107,60,0.10);
+}
+body{font-family:'Noto Sans KR',-apple-system,sans-serif;background:var(--gbg);min-height:100vh}
+.screen{display:none;padding:1rem;max-width:480px;margin:0 auto}
+.screen.active{display:block}
+
+/* 헤더 */
+.hdr{display:flex;align-items:center;gap:10px;margin-bottom:1.25rem;padding-bottom:1rem;border-bottom:1px solid var(--bdl)}
+.back{display:inline-flex;align-items:center;gap:6px;background:#fff;border:1px solid var(--bd);border-radius:20px;padding:6px 14px;font-size:13px;cursor:pointer;color:var(--g1);font-weight:500;transition:all .2s;font-family:inherit}
+.back:hover{background:var(--g5);border-color:var(--g3)}
+.ptitle{font-size:17px;font-weight:700;color:var(--tx)}
+
+/* 카드 */
+.card{background:#fff;border:1px solid var(--bdl);border-radius:16px;padding:1.1rem 1rem;cursor:pointer;transition:all .2s;position:relative;overflow:hidden}
+.card:hover{border-color:var(--g3);box-shadow:var(--shadow);transform:translateY(-1px)}
+.cgrid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.full{grid-column:1/-1}
+
+/* 홈 카드 — 아이콘 + 텍스트 가로 배치 */
+.home-card{display:flex;align-items:center;gap:14px}
+.home-card-icon{width:46px;height:46px;border-radius:13px;background:var(--g6);border:1px solid var(--bdl);display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.home-card-text .ctitle{font-size:15px;font-weight:700;color:var(--tx)}
+.home-card-text .csub{font-size:12px;color:var(--tl);margin-top:3px}
+
+/* 배지 */
+.badge{display:inline-block;font-size:11px;padding:3px 10px;border-radius:20px;margin-bottom:8px;font-weight:600}
+.bg1{background:#d4edda;color:#1a6b3c}.bg2{background:#cce3f7;color:#0d4f8a}.bg3{background:#fde8c8;color:#7a4010}.bgp{background:#ede4fb;color:#4b2d9e}
+.ctitle{font-size:15px;font-weight:600;color:var(--tx)}
+.csub{font-size:12px;color:var(--tl);margin-top:3px}
+
+/* 폼 */
+.flabel{font-size:13px;color:var(--ts);margin-bottom:6px;display:flex;align-items:center;gap:6px;font-weight:500}
+.finput{width:100%;padding:10px 14px;border:1.5px solid var(--bd);border-radius:10px;font-size:15px;background:#fff;color:var(--tx);transition:border-color .2s;font-family:inherit}
+.finput:focus{outline:none;border-color:var(--g2);box-shadow:0 0 0 3px rgba(45,155,95,0.1)}
+.sgrp{display:flex;gap:8px;flex-wrap:wrap}
+.sbtn{border:1.5px solid var(--bd);border-radius:20px;padding:7px 16px;font-size:13px;cursor:pointer;background:#fff;color:var(--ts);transition:all .2s;font-family:inherit}
+.sbtn:hover{background:var(--g6);border-color:var(--g3)}
+.sbtn.on{border-color:var(--g2);background:var(--g5);color:var(--g1);font-weight:600}
+.fsec{margin-bottom:1.25rem}
+.savebtn{width:100%;padding:13px;background:linear-gradient(135deg,var(--g2),var(--g1));color:#fff;border:none;border-radius:12px;font-size:16px;font-weight:700;cursor:pointer;margin-top:1rem;transition:all .2s;font-family:inherit;letter-spacing:.02em}
+.savebtn:hover{transform:translateY(-1px);box-shadow:0 4px 16px rgba(26,107,60,0.3)}
+.slrow{display:flex;align-items:center;gap:12px}
+.slval{font-size:16px;font-weight:700;min-width:32px;color:var(--g1)}
+.sec-label{font-size:11px;color:var(--tl);letter-spacing:.05em;margin-bottom:10px;font-weight:500;text-transform:uppercase}
+
+/* 분석 카드 */
+.wkcard{background:#fff;border:1px solid var(--bdl);border-radius:14px;padding:1rem;margin-bottom:12px;box-shadow:var(--shadow)}
+.wktitle{font-size:14px;font-weight:700;color:var(--tx);margin-bottom:10px;display:flex;align-items:center;gap:6px}
+.statrow{display:flex;justify-content:space-between;font-size:13px;padding:6px 0;border-bottom:1px solid var(--bdl)}
+.statrow:last-child{border-bottom:none}
+.statlabel{color:var(--tl)}.statval{font-weight:600;color:var(--tx)}
+.legend{display:flex;gap:14px;flex-wrap:wrap;margin-bottom:10px}
+.leg-item{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--ts)}
+.leg-dot{width:10px;height:10px;border-radius:50%}
+.rank-card{border-radius:10px;padding:10px 14px;margin-bottom:8px;font-size:13px;font-weight:500}
+.r-green{background:#d4edda;color:#1a6b3c}.r-blue{background:#cce3f7;color:#0d4f8a}.r-amber{background:#fde8c8;color:#7a4010}.r-purple{background:#ede4fb;color:#4b2d9e}
+.metric-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px}
+.metric{background:var(--gbg);border-radius:10px;padding:12px 14px;border:1px solid var(--bdl)}
+.metric-label{font-size:11px;color:var(--tl);margin-bottom:4px;font-weight:500;letter-spacing:.03em}
+.metric-val{font-size:22px;font-weight:700;color:var(--g1)}
+.metric-unit{font-size:12px;color:var(--tl);margin-left:2px;font-weight:400}
+.state-row{display:flex;justify-content:space-between;align-items:center;font-size:13px;padding:7px 0;border-bottom:1px solid var(--bdl)}
+.state-row:last-child{border-bottom:none}
+
+/* 달력 */
+.cal-wrap{margin-bottom:1.5rem}
+.cal-month-title{font-size:15px;font-weight:700;color:var(--tx);margin-bottom:8px}
+.cal-container{background:#fff;border-radius:16px;overflow:hidden;border:1px solid var(--bdl);box-shadow:0 2px 10px rgba(26,107,60,0.07);margin-bottom:.5rem}
+.cal-grid8{display:grid;grid-template-columns:repeat(7,1fr) 36px;gap:0}
+.cal-grid8 .cal-dow{text-align:center;font-size:11px;color:var(--tl);padding:7px 2px;font-weight:600;background:var(--g6);border-bottom:1px solid var(--bdl)}
+.cal-grid8 .cal-day{text-align:center;padding:4px 2px;font-size:12px;color:var(--tx);min-height:46px;display:flex;flex-direction:column;align-items:center;padding-top:5px;gap:2px;border-right:1px solid var(--bdl);border-bottom:1px solid var(--bdl)}
+.cal-grid8 .cal-day:last-child{border-right:none}
+.cal-grid8 .cal-day.has-rec{background:#fafffe}
+.cal-grid8 .cal-day.clickable-day{cursor:pointer}
+.cal-grid8 .cal-day.clickable-day:hover{background:var(--g5)}
+.cal-grid8 .cal-day.today .cal-num{background:var(--g2);color:#fff;border-radius:50%;width:22px;height:22px;display:flex;align-items:center;justify-content:center;font-weight:700}
+.cal-grid8 .cal-day.empty{background:var(--gbg);border-right:1px solid var(--bdl);border-bottom:1px solid var(--bdl)}
+.cal-grid8 .cal-wk-btn{background:linear-gradient(160deg,var(--g3),var(--g2));display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:8px;font-weight:700;color:#fff;text-align:center;line-height:1.4;min-height:46px;transition:all .2s;border-bottom:1px solid var(--bdl)}
+.cal-grid8 .cal-wk-btn:hover{background:linear-gradient(160deg,var(--g2),var(--g1))}
+.cal-grid8>div[style*="background:transparent"]{border-right:1px solid var(--bdl);border-bottom:1px solid var(--bdl)}
+.cal-num{font-size:12px;line-height:1}
+.rec-badge{font-size:8px;color:var(--g1);background:var(--g5);border-radius:4px;padding:1px 4px;font-weight:700;line-height:1.4;white-space:nowrap}
+.event-dot{width:5px;height:5px;border-radius:50%;display:inline-block;margin:0 1px}
+.event-dots-row{display:flex;justify-content:center;gap:2px;flex-wrap:wrap}
+
+/* 이벤트 목록 */
+.event-list{display:flex;flex-direction:column;gap:6px;margin-bottom:1rem}
+.event-item{border-radius:10px;padding:9px 13px;font-size:12px;font-weight:500;display:flex;align-items:center;gap:8px}
+.ev1{background:#d4edda;color:#1a6b3c}.ev2{background:#cce3f7;color:#0d4f8a}.ev3{background:#fde8c8;color:#7a4010}
+
+/* 앨범 */
+.plant-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.plant-card{background:#fff;border:1px solid var(--bdl);border-radius:14px;overflow:hidden;cursor:pointer;transition:all .2s}
+.plant-card:hover{border-color:var(--g3);box-shadow:var(--shadow);transform:translateY(-1px)}
+.plant-thumb{width:100%;aspect-ratio:1;background:var(--g6);display:flex;align-items:center;justify-content:center;flex-direction:column;gap:6px}
+.plant-thumb-label{font-size:11px;color:var(--tl);text-align:center;padding:0 8px}
+.plant-card-info{padding:8px 12px}
+.plant-card-name{font-size:13px;font-weight:700;color:var(--tx)}
+.plant-card-sub{font-size:11px;color:var(--tl);margin-top:2px}
+.sort-bar{display:flex;gap:8px;margin-bottom:1rem}
+.sort-btn{border:1.5px solid var(--bd);border-radius:20px;padding:6px 16px;font-size:12px;cursor:pointer;background:#fff;color:var(--ts);font-weight:500;transition:all .2s}
+.sort-btn.on{border-color:var(--g2);background:var(--g5);color:var(--g1)}
+.album-item{display:flex;gap:12px;padding:14px 0;border-bottom:1px solid var(--bdl);align-items:flex-start}
+.album-item:last-child{border-bottom:none}
+.album-photo{width:80px;height:80px;border-radius:10px;background:var(--g6);flex-shrink:0;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:4px;border:1px solid var(--bdl)}
+.album-photo-label{font-size:10px;color:var(--tl);text-align:center;padding:0 4px}
+.album-info{flex:1}
+.album-date{font-size:13px;font-weight:700;color:var(--tx);margin-bottom:4px}
+.album-stats{font-size:12px;color:var(--tl);line-height:1.7}
+
+/* 공유 */
+.share-card{background:#fff;border-radius:14px;overflow:hidden;border:1px solid var(--bdl);margin-bottom:14px;box-shadow:var(--shadow)}
+.card-hdr{background:linear-gradient(135deg,var(--g1),var(--g2));padding:16px 18px}
+.card-hdr-title{font-size:17px;font-weight:700;color:#fff}
+.card-hdr-sub{font-size:11px;color:rgba(255,255,255,.7);margin-top:3px}
+.summary-band{padding:12px 16px;background:var(--g6);border-bottom:1px solid var(--bdl)}
+.grp-row{display:flex;align-items:center;justify-content:space-between;padding:9px 12px;border-radius:10px;margin-bottom:6px}
+.grp-name{font-size:12px;font-weight:700}
+.grp-sub{font-size:11px;color:#5F5E5A;margin-top:2px}
+.grp-val{font-size:15px;font-weight:700;color:var(--tx);text-align:right}
+.grp-val-sub{font-size:11px;color:var(--tl)}
+.card-footer{padding:8px 16px;background:var(--g6);border-top:1px solid var(--bdl);display:flex;justify-content:space-between}
+.footer-txt{font-size:10px;color:var(--tl)}
+.photo-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:5px;padding:0 12px 12px}
+.photo-col-hdr{text-align:center;font-size:10px;font-weight:700;padding:7px 0}
+.photo-cell{aspect-ratio:1;background:var(--g6);border-radius:8px;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:3px;font-size:9px;color:var(--tl);text-align:center;border:1px solid var(--bdl)}
+.tab-bar{display:flex;gap:8px;margin-bottom:1rem}
+.tab-btn{flex:1;padding:9px;border-radius:10px;font-size:13px;font-weight:600;cursor:pointer;border:1.5px solid var(--bd);background:#fff;color:var(--ts);transition:all .2s;font-family:inherit}
+.tab-btn.on{background:var(--g2);color:#fff;border-color:var(--g2)}
+.share-btn{width:100%;padding:12px;border-radius:10px;font-size:13px;font-weight:700;cursor:pointer;margin-bottom:8px;transition:all .2s;font-family:inherit}
+.btn-green{background:linear-gradient(135deg,var(--g2),var(--g1));color:#fff;border:none}
+.btn-green:hover{box-shadow:0 4px 14px rgba(26,107,60,0.3);transform:translateY(-1px)}
+.btn-outline{background:#fff;color:var(--g2);border:1.5px solid var(--g2)}
+.btn-outline:hover{background:var(--g5)}
+.copy-msg{display:none;text-align:center;font-size:12px;color:var(--g2);margin-top:4px;margin-bottom:8px;font-weight:600}
+input[type=range]{width:100%;accent-color:var(--g2)}
+.clickable-day{cursor:pointer}
+
+/* 홈 히어로 */
+.home-hero{position:relative;padding:1rem 0 0.75rem;margin-bottom:0.5rem;display:flex;align-items:flex-start;justify-content:space-between}
+.home-hero-text{}
+.home-title{font-size:26px;font-weight:700;color:var(--g1);line-height:1.2}
+.home-sub{font-size:13px;color:var(--tl);margin-top:5px}
+.home-deco{flex-shrink:0;margin-top:-8px}
+
+/* Special Events 섹션 */
+.events-section{background:#fff;border-radius:14px;border:1px solid var(--bdl);padding:.75rem 1rem;margin-bottom:1rem}
+.events-title{font-size:11px;font-weight:700;color:var(--tl);letter-spacing:.06em;text-transform:uppercase;margin-bottom:8px;display:flex;align-items:center;gap:6px}
+</style>
+
+<!-- Firebase SDK (Firestore only, Spark 무료 플랜) -->
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+<script>
+  var STORAGE_KEY = "zinnia_db";
+  var COMMON_KEY = "zinnia_common";
+
+  /* ── Firebase 초기화 ── */
+  firebase.initializeApp({
+    apiKey: "AIzaSyAlBLZspISxJS3PmrY6CmE3KXTEPoT5cxs",
+    authDomain: "zinnia-journal.firebaseapp.com",
+    projectId: "zinnia-journal",
+    storageBucket: "zinnia-journal.firebasestorage.app",
+    messagingSenderId: "648400132065",
+    appId: "1:648400132065:web:8d3c3aaceb8be0b6a1e4a0"
+  });
+  var fsdb = firebase.firestore();
+
+  /* ── localStorage 저장 (즉시 반영, 매 입력마다 호출) ── */
+  window.saveToStorage = function() {
+    try {
+      var saveData = {DB:{}, DAY_DATES: DAY_DATES.slice(), DAYS: DAYS.slice()};
+      Object.keys(DB).forEach(function(p){
+        saveData.DB[p]={};
+        Object.keys(DB[p]).forEach(function(di){
+          saveData.DB[p][di]=Object.assign({},DB[p][di]);
+        });
+      });
+      localStorage.setItem('zinnia_db', JSON.stringify(saveData));
+    } catch(e) { console.error("localStorage 저장 실패:", e); }
+  };
+
+  /* ── Firestore에 동기화 (저장 버튼 클릭 시 호출) ── */
+  window.syncToFirestore = function() {
+    console.log('Firestore 동기화 시작...');
+    var batch = fsdb.batch();
+    batch.set(fsdb.collection('meta').doc('config'), {
+      DAY_DATES: DAY_DATES, DAYS: DAYS
+    });
+    Object.keys(DB).forEach(function(plantKey){
+      if(!DB[plantKey] || Object.keys(DB[plantKey]).length === 0) return;
+      batch.set(fsdb.collection('records').doc(plantKey), DB[plantKey]);
+    });
+    return batch.commit().then(function(){
+      console.log('Firestore 동기화 완료');
+    }).catch(function(e){
+      console.error('Firestore 동기화 실패:', e);
+    });
+  };
+
+  /* ── Firestore에서 전체 데이터 로드 ── */
+  window.loadFromFirestore = function() {
+    return fsdb.collection('meta').doc('config').get().then(function(doc){
+      if(doc.exists){
+        var data = doc.data();
+        if(data.DAY_DATES && data.DAY_DATES.length > 0){
+          DAY_DATES.length = 0;
+          data.DAY_DATES.forEach(function(d){ DAY_DATES.push(d); });
+          DAYS.length = 0;
+          if(data.DAYS && data.DAYS.length > 0){
+            data.DAYS.forEach(function(d){ DAYS.push(d); });
+          } else {
+            DAY_DATES.forEach(function(dd){ DAYS.push(dd.m+'/'+dd.d); });
+          }
+        }
+      }
+      return fsdb.collection('records').get();
+    }).then(function(snapshot){
+      snapshot.forEach(function(doc){ DB[doc.id] = doc.data(); });
+      rebuildWeeks();
+      console.log('Firestore 로드 완료 - 날짜수:', DAY_DATES.length);
+    });
+  };
+
+  /* ── localStorage 폴백 로드 (오프라인용) ── */
+  window.loadFromLocalStorage = function() {
+    try {
+      var saved = localStorage.getItem('zinnia_db');
+      if(!saved) return;
+      var data = JSON.parse(saved);
+      if(data.DB) {
+        Object.keys(data.DB).forEach(function(p){
+          DB[p] = {};
+          Object.keys(data.DB[p]).forEach(function(dk){ DB[p][dk] = data.DB[p][dk]; });
+        });
+      }
+      if(data.DAY_DATES && data.DAY_DATES.length > 0) {
+        DAY_DATES.length = 0;
+        data.DAY_DATES.forEach(function(d){ DAY_DATES.push(d); });
+        DAYS.length = 0;
+        DAY_DATES.forEach(function(dd){ DAYS.push(dd.m+'/'+dd.d); });
+      }
+      rebuildWeeks();
+      console.log('localStorage 폴백 로드 완료');
+    } catch(e) { console.error("localStorage 불러오기 실패:", e); }
+  };
+
+  /* ── 사진: Canvas 리사이즈 → Base64 (Storage 불필요) ── */
+  window.uploadPhoto = function(file, plantKey, dayIdx) {
+    return new Promise(function(resolve){
+      var reader = new FileReader();
+      reader.onload = function(e){
+        var img = new Image();
+        img.onload = function(){
+          var canvas = document.createElement('canvas');
+          canvas.width = 400; canvas.height = 300;
+          var ctx = canvas.getContext('2d');
+          var ratio = Math.max(400/img.width, 300/img.height);
+          var w = img.width*ratio, h = img.height*ratio;
+          ctx.drawImage(img, (400-w)/2, (300-h)/2, w, h);
+          resolve(canvas.toDataURL('image/jpeg', 0.7));
+        };
+        img.onerror = function(){ resolve(null); };
+        img.src = e.target.result;
+      };
+      reader.onerror = function(){ resolve(null); };
+      reader.readAsDataURL(file);
+    });
+  };
+</script>
+</head>
+<body>
+
+<!-- 홈 -->
+<div id="s-home" class="screen active">
+  <!-- 히어로 -->
+  <div style="padding:1rem 0 0.5rem">
+    <div style="font-size:26px;font-weight:700;color:var(--g1);line-height:1.2">백일홍 관찰일지</div>
+    <div style="font-size:13px;color:var(--tl);margin-top:5px">비료 실험 · 성장 기록</div>
+  </div>
+
+  <!-- Special Events -->
+  <div id="home-cal-events"></div>
+
+  <!-- 달력 -->
+  <div id="home-cal-months"></div>
+
+  <!-- 임시 디버그 버튼 -->
+  <div id="debug-area" style="margin-top:8px;padding:8px;background:#fff3;border-radius:8px;font-size:11px;display:none"></div>
+  <button onclick="debugStorage()" style="width:100%;margin-top:8px;padding:8px;background:#888;color:#fff;border:none;border-radius:8px;font-size:12px;cursor:pointer">🔍 저장 상태 확인</button>
+
+  <!-- 하단 버튼 -->
+  <div style="display:flex;gap:12px;margin-top:1rem">
+    <div class="card" style="flex:1" onclick="go('s-album')">
+      <div style="display:flex;align-items:center;gap:12px">
+        <div style="width:40px;height:40px;background:var(--g6);border:1px solid var(--bdl);border-radius:11px;display:flex;align-items:center;justify-content:center;flex-shrink:0">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z" stroke="#2d9b5f" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><circle cx="12" cy="13" r="4" stroke="#2d9b5f" stroke-width="1.8"/></svg>
+        </div>
+        <div><div class="ctitle">식물 앨범</div><div class="csub">사진 타임라인</div></div>
+      </div>
+    </div>
+    <div class="card" style="flex:1" onclick="go('s-share')">
+      <div style="display:flex;align-items:center;gap:12px">
+        <div style="width:40px;height:40px;background:var(--g6);border:1px solid var(--bdl);border-radius:11px;display:flex;align-items:center;justify-content:center;flex-shrink:0">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none"><circle cx="18" cy="5" r="3" stroke="#2d9b5f" stroke-width="1.8"/><circle cx="6" cy="12" r="3" stroke="#2d9b5f" stroke-width="1.8"/><circle cx="18" cy="19" r="3" stroke="#2d9b5f" stroke-width="1.8"/><path d="M8.59 13.51l6.83 3.98M15.41 6.51L8.59 10.49" stroke="#2d9b5f" stroke-width="1.8" stroke-linecap="round"/></svg>
+        </div>
+        <div><div class="ctitle">공유</div><div class="csub">관찰 카드 공유</div></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 관찰기록 -->
+<div id="s-obs" class="screen">
+  <div class="hdr"><button class="back" onclick="go('s-date-popup')"><svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M19 12H5M12 5l-7 7 7 7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg> 뒤로</button><span class="ptitle">관찰 기록</span></div>
+  <div style="background:var(--green-pale);border-radius:10px;padding:8px 14px;margin-bottom:1rem;display:flex;align-items:center;gap:8px">
+    <span style="display:flex;align-items:center"><svg width="20" height="20" viewBox="0 0 24 24" fill="none"><rect x="3" y="4" width="18" height="18" rx="3" stroke="#2d9b5f" stroke-width="1.8"/><path d="M3 9h18" stroke="#2d9b5f" stroke-width="1.8"/><path d="M8 2v4M16 2v4" stroke="#2d9b5f" stroke-width="1.8" stroke-linecap="round"/><circle cx="8" cy="14" r="1" fill="#2d9b5f"/><circle cx="12" cy="14" r="1" fill="#2d9b5f"/><circle cx="16" cy="14" r="1" fill="#2d9b5f"/></svg></span>
+    <span id="obs-date-display" style="font-size:14px;font-weight:600;color:var(--green-deep)"></span>
+    <span id="obs-date-sub" style="font-size:12px;color:var(--text-light)"></span>
+  </div>
+  <div style="display:flex;flex-direction:column;gap:12px">
+    <div class="card" onclick="go('s-common')"><div style="display:flex;align-items:center;gap:10px"><div style="width:38px;height:38px;background:var(--g6);border:1px solid var(--bdl);border-radius:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0"><svg width="16" height="16" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="5" stroke="#854F0B" stroke-width="1.8"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42" stroke="#854F0B" stroke-width="1.8" stroke-linecap="round"/></svg></div><div><div class="ctitle">공통 기록</div><div class="csub">날씨·온도·물주기</div></div></div></div>
+    <div class="card" onclick="go('s-indiv')"><div style="display:flex;align-items:center;gap:10px"><div style="width:38px;height:38px;background:var(--g6);border:1px solid var(--bdl);border-radius:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0"><svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M17 8C8 10 5.9 16.17 3.82 19.34L5.71 21l1-1C8.7 21 18 21 21 12c-1 2-2 3-4 4 2-4 0-7-4-8z" stroke="#3B6D11" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></div><div><div class="ctitle">개별 기록</div><div class="csub">그룹별 식물 개별 기록</div></div></div></div>
+  </div>
+</div>
+<div id="s-common" class="screen"><div class="hdr"><button class="back" onclick="go('s-obs')"><svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M19 12H5M12 5l-7 7 7 7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg> 관찰 기록</button><span class="ptitle">공통 기록</span></div><p style="font-size:12px;color:#888;margin-bottom:1.25rem" id="today-lbl"></p><div class="fsec"><label class="flabel"><svg width="16" height="16" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="5" stroke="#854F0B" stroke-width="1.8"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42" stroke="#854F0B" stroke-width="1.8" stroke-linecap="round"/></svg> 실내 온도 (°C)</label><input class="finput" type="number" placeholder="예: 22" style="width:140px"></div><div class="fsec"><label class="flabel"><svg width="16" height="16" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="5" stroke="#854F0B" stroke-width="1.8"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42" stroke="#854F0B" stroke-width="1.8" stroke-linecap="round"/></svg> 햇빛 조건</label><div class="sgrp"><button class="sbtn" onclick="sel(this,'sun')">강함</button><button class="sbtn" onclick="sel(this,'sun')">보통</button><button class="sbtn" onclick="sel(this,'sun')">약함</button></div></div><div class="fsec"><label class="flabel"><svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M12 2.69l5.66 5.66a8 8 0 11-11.31 0z" stroke="#185FA5" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg> 물 주기</label><div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap"><button class="sbtn" id="wno" onclick="setW('no')">안줌</button><button class="sbtn" id="wyes" onclick="setW('yes')">분무기로</button><div id="spray" style="display:none;align-items:center;gap:8px"><input type="range" min="1" max="10" value="3" id="spray-sl" oninput="document.getElementById('spray-v').innerText=this.value" style="width:100px"><span class="slval" id="spray-v">3</span><span style="font-size:13px;color:#888">번</span></div></div></div><div class="fsec"><label class="flabel">공통 특이사항</label><textarea class="finput" rows="3" placeholder="자유롭게 입력"></textarea></div><button class="savebtn" onclick="saveCommon()">저장</button></div>
+<div id="s-indiv" class="screen"><div class="hdr"><button class="back" onclick="go('s-obs')"><svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M19 12H5M12 5l-7 7 7 7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg> 관찰 기록</button><span class="ptitle">개별 기록</span></div><p class="sec-label">그룹 선택</p><div style="display:flex;flex-direction:column;gap:12px"><div class="card" onclick="go('s-g1')"><div class="badge bg1">그룹 1</div><div class="ctitle">무비료</div><div class="csub">화분 2개 · 식물 4개</div></div><div class="card" onclick="go('s-g2')"><div class="badge bg2">그룹 2</div><div class="ctitle">액체비료</div><div class="csub">화분 2개 · 식물 4개</div></div><div class="card" onclick="go('s-g3')"><div class="badge bg3">그룹 3</div><div class="ctitle">고체비료</div><div class="csub">화분 2개 · 식물 4개</div></div></div></div>
+<div id="s-g1" class="screen"><div class="hdr"><button class="back" onclick="go('s-indiv')"><svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M19 12H5M12 5l-7 7 7 7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg> 개별 기록</button><span class="ptitle">그룹 1 · 무비료</span></div><div style="display:flex;flex-direction:column;gap:12px"><div class="card" onclick="go('s-pot');setPot('1-1','무비료','s-g1')"><div class="ctitle">화분 1</div><div style="display:grid;grid-template-columns:1fr 1fr;gap:4px;margin-top:8px"><span style="font-size:13px;color:#888">1-1-a</span><span style="font-size:13px;color:#888">1-1-b</span></div></div><div class="card" onclick="go('s-pot');setPot('1-2','무비료','s-g1')"><div class="ctitle">화분 2</div><div style="display:grid;grid-template-columns:1fr 1fr;gap:4px;margin-top:8px"><span style="font-size:13px;color:#888">1-2-a</span><span style="font-size:13px;color:#888">1-2-b</span></div></div></div></div>
+<div id="s-g2" class="screen"><div class="hdr"><button class="back" onclick="go('s-indiv')"><svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M19 12H5M12 5l-7 7 7 7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg> 개별 기록</button><span class="ptitle">그룹 2 · 액체비료</span></div><div style="display:flex;flex-direction:column;gap:12px"><div class="card" onclick="go('s-pot');setPot('2-1','액체비료','s-g2')"><div class="ctitle">화분 1</div><div style="display:grid;grid-template-columns:1fr 1fr;gap:4px;margin-top:8px"><span style="font-size:13px;color:#888">2-1-a</span><span style="font-size:13px;color:#888">2-1-b</span></div></div><div class="card" onclick="go('s-pot');setPot('2-2','액체비료','s-g2')"><div class="ctitle">화분 2</div><div style="display:grid;grid-template-columns:1fr 1fr;gap:4px;margin-top:8px"><span style="font-size:13px;color:#888">2-2-a</span><span style="font-size:13px;color:#888">2-2-b</span></div></div></div></div>
+<div id="s-g3" class="screen"><div class="hdr"><button class="back" onclick="go('s-indiv')"><svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M19 12H5M12 5l-7 7 7 7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg> 개별 기록</button><span class="ptitle">그룹 3 · 고체비료</span></div><div style="display:flex;flex-direction:column;gap:12px"><div class="card" onclick="go('s-pot');setPot('3-1','고체비료','s-g3')"><div class="ctitle">화분 1</div><div style="display:grid;grid-template-columns:1fr 1fr;gap:4px;margin-top:8px"><span style="font-size:13px;color:#888">3-1-a</span><span style="font-size:13px;color:#888">3-1-b</span></div></div><div class="card" onclick="go('s-pot');setPot('3-2','고체비료','s-g3')"><div class="ctitle">화분 2</div><div style="display:grid;grid-template-columns:1fr 1fr;gap:4px;margin-top:8px"><span style="font-size:13px;color:#888">3-2-a</span><span style="font-size:13px;color:#888">3-2-b</span></div></div></div></div>
+<div id="s-pot" class="screen"><div class="hdr"><button class="back" id="pot-back">← 뒤로</button><span class="ptitle" id="pot-title">화분</span></div><p class="sec-label">식물 선택</p><div style="display:flex;flex-direction:column;gap:12px"><div class="card" onclick="go('s-plant');setPlant('a')"><div class="ctitle" id="pa-name">-a</div><div class="csub">첫 번째 식물</div></div><div class="card" onclick="go('s-plant');setPlant('b')"><div class="ctitle" id="pb-name">-b</div><div class="csub">두 번째 식물</div></div></div></div>
+<div id="s-plant" class="screen"><div class="hdr"><button class="back" onclick="go('s-pot')"><svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M19 12H5M12 5l-7 7 7 7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg> 화분</button><span class="ptitle" id="plant-title">식물 기록</span></div><div class="fsec"><label class="flabel">키 (cm)</label><input class="finput" type="number" id="p-height" placeholder="예: 12.5" style="width:140px" oninput="saveInput()"></div><div class="fsec"><label class="flabel">잎 수 (개)</label><div class="slrow"><input type="range" min="0" max="10" value="0" id="leaf-sl" oninput="document.getElementById('leaf-v').innerText=this.value;saveInput()" style="flex:1"><span class="slval" id="leaf-v">0</span></div><div style="margin-top:8px;display:flex;align-items:center;gap:8px"><input type="checkbox" id="leaf-other" onchange="toggleLeafOther(this.checked)"><label for="leaf-other" style="font-size:13px;color:#666">직접 입력</label><input class="finput" id="leaf-other-in" type="number" placeholder="입력" style="width:80px;display:none" oninput="saveInput()"></div></div><div class="fsec"><label class="flabel"><svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M17 8C8 10 5.9 16.17 3.82 19.34L5.71 21l1-1C8.7 21 18 21 21 12c-1 2-2 3-4 4 2-4 0-7-4-8z" stroke="#3B6D11" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg> 잎 상태</label><div class="sgrp" id="sg-leaf"><button class="sbtn" onclick="sel(this,'leaf');saveInput()">정상</button><button class="sbtn" onclick="sel(this,'leaf');saveInput()">연한 노랑</button><button class="sbtn" onclick="sel(this,'leaf');saveInput()">갈색</button></div></div><div class="fsec"><label class="flabel">줄기 상태</label><div class="sgrp" id="sg-stem"><button class="sbtn" onclick="sel(this,'stem');saveInput()">정상</button><button class="sbtn" onclick="sel(this,'stem');saveInput()">휘어짐</button><button class="sbtn" onclick="sel(this,'stem');saveInput()">손상</button></div></div><div class="fsec"><label class="flabel"><svg width="16" height="16" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="3" stroke="#993556" stroke-width="1.8"/><path d="M12 2a4 4 0 000 8 4 4 0 000-8zM12 14a4 4 0 000 8 4 4 0 000-8zM2 12a4 4 0 008 0 4 4 0 00-8 0zM14 12a4 4 0 008 0 4 4 0 00-8 0z" stroke="#993556" stroke-width="1.6"/></svg> 꽃/싹 상태</label><div class="sgrp" id="sg-flower"><button class="sbtn" onclick="sel(this,'flower');saveInput()">없음</button><button class="sbtn" onclick="sel(this,'flower');saveInput()">꽃봉오리</button><button class="sbtn" onclick="sel(this,'flower');saveInput()">개화</button></div></div><div class="fsec">
+  <label class="flabel"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" style="vertical-align:middle;margin-right:4px"><path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z" stroke="#2d9b5f" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><circle cx="12" cy="13" r="4" stroke="#2d9b5f" stroke-width="1.8"/></svg> 사진</label>
+  <div id="photo-preview" style="margin-bottom:8px;display:none">
+    <img id="photo-preview-img" style="width:100%;max-height:200px;object-fit:cover;border-radius:10px;border:1px solid var(--bdl)">
+  </div>
+  <label style="display:block;width:100%;padding:11px;background:var(--g6);border:1.5px dashed var(--bd);border-radius:10px;text-align:center;font-size:13px;color:var(--ts);cursor:pointer;font-family:inherit">
+    사진 선택 또는 촬영
+    <input type="file" accept="image/*" capture="environment" style="display:none" onchange="handlePhotoSelect(this)">
+  </label>
+  <div id="photo-upload-status" style="font-size:12px;color:var(--tl);margin-top:6px;text-align:center"></div>
+</div>
+<div class="fsec"><label class="flabel">특이사항</label><textarea class="finput" rows="3" placeholder="자유롭게 입력" id="p-note" oninput="saveInput()"></textarea></div><button class="savebtn" onclick="confirmSave()">저장</button></div>
+
+<!-- 달력 -->
+<div id="s-cal" class="screen" style="display:none"></div>
+<!-- 날짜 선택 팝업 -->
+<div id="s-date-popup" class="screen">
+  <div class="hdr"><button class="back" onclick="go('s-home')"><svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M19 12H5M12 5l-7 7 7 7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg> 홈</button><span class="ptitle" id="popup-title">날짜 선택</span></div>
+  <div id="popup-date-label" style="font-size:13px;color:var(--text-light);margin-bottom:1rem"></div>
+  <div style="display:flex;flex-direction:column;gap:12px">
+    <div class="card" onclick="goToObsFromCal()">
+      <div style="display:flex;align-items:center;gap:12px">
+        <div style="width:44px;height:44px;background:var(--g6);border:1px solid var(--bdl);border-radius:12px;display:flex;align-items:center;justify-content:center;flex-shrink:0"><svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7" stroke="#2d9b5f" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z" stroke="#2d9b5f" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+        <div><div class="ctitle">관찰 기록 입력</div><div class="csub">이 날짜의 관찰 데이터 입력하기</div></div>
+      </div>
+    </div>
+    <div class="card" onclick="goToDayAnalysis()">
+      <div style="display:flex;align-items:center;gap:12px">
+        <div style="width:44px;height:44px;background:#e8f2fd;border:1px solid #bdd6f0;border-radius:12px;display:flex;align-items:center;justify-content:center;flex-shrink:0"><svg width="20" height="20" viewBox="0 0 24 24" fill="none"><line x1="18" y1="20" x2="18" y2="10" stroke="#185FA5" stroke-width="1.8" stroke-linecap="round"/><line x1="12" y1="20" x2="12" y2="4" stroke="#185FA5" stroke-width="1.8" stroke-linecap="round"/><line x1="6" y1="20" x2="6" y2="14" stroke="#185FA5" stroke-width="1.8" stroke-linecap="round"/></svg></div>
+        <div><div class="ctitle">하루 분석 보기</div><div class="csub">이 날짜의 3그룹 분석 데이터</div></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="s-day" class="screen"><div class="hdr"><button class="back" onclick="go('s-date-popup')"><svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M19 12H5M12 5l-7 7 7 7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg> 뒤로</button><span class="ptitle" id="day-title">하루 분석</span></div><div id="day-body"></div></div>
+
+<!-- 주간 분석 -->
+<div id="s-wk" class="screen"><div class="hdr"><button class="back" onclick="go('s-home')"><svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M19 12H5M12 5l-7 7 7 7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg> 홈</button><span class="ptitle">주간 분석</span></div><p class="sec-label">분석 선택</p><div style="display:flex;flex-direction:column;gap:12px"><div class="card" onclick="go('s-wk-total')"><div class="badge bgp">총합</div><div class="ctitle">총합 분석</div><div class="csub">3그룹 비교 그래프 + 순위</div></div><div class="card" onclick="go('s-wk-grp');setWkGrp(1)"><div class="badge bg1">그룹 1</div><div class="ctitle">무비료</div><div class="csub">주차별 분석</div></div><div class="card" onclick="go('s-wk-grp');setWkGrp(2)"><div class="badge bg2">그룹 2</div><div class="ctitle">액체비료</div><div class="csub">주차별 분석</div></div><div class="card" onclick="go('s-wk-grp');setWkGrp(3)"><div class="badge bg3">그룹 3</div><div class="ctitle">고체비료</div><div class="csub">주차별 분석</div></div></div></div>
+<div id="s-wk-grp" class="screen"><div class="hdr"><button class="back" onclick="go('s-wk')"><svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M19 12H5M12 5l-7 7 7 7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg> 주간 분석</button><span class="ptitle" id="wkgrp-title">그룹 분석</span></div><p class="sec-label">주차 선택</p><div id="week-list" style="display:flex;flex-direction:column;gap:10px"></div></div>
+<div id="s-wk-detail" class="screen"><div class="hdr"><button class="back" onclick="go('s-wk-grp')"><svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M19 12H5M12 5l-7 7 7 7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg> 주차 선택</button><span class="ptitle" id="wkdetail-title">주간 분석</span></div><div id="wk-detail-body"></div></div>
+<div id="s-wk-total" class="screen"><div class="hdr"><button class="back" onclick="go('s-wk')"><svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M19 12H5M12 5l-7 7 7 7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg> 주간 분석</button><span class="ptitle">총합 분석</span></div><p class="sec-label">주차 선택</p><div id="total-week-list" style="display:flex;flex-direction:column;gap:10px"></div></div>
+<div id="s-wk-total-detail" class="screen"><div class="hdr"><button class="back" onclick="go('s-home')"><svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M19 12H5M12 5l-7 7 7 7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg> 홈</button><span class="ptitle" id="total-detail-title">총합 분석</span></div><div id="total-detail-body"></div></div>
+
+<!-- 식물 앨범 -->
+<div id="s-album" class="screen"><div class="hdr"><button class="back" onclick="go('s-home')"><svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M19 12H5M12 5l-7 7 7 7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg> 홈</button><span class="ptitle">식물 앨범</span></div><p class="sec-label">그룹 선택</p><div style="display:flex;flex-direction:column;gap:12px"><div class="card" onclick="go('s-alb-grp');setAlbGrp(1)"><div class="badge bg1">그룹 1</div><div class="ctitle">무비료</div><div class="csub">식물 4개</div></div><div class="card" onclick="go('s-alb-grp');setAlbGrp(2)"><div class="badge bg2">그룹 2</div><div class="ctitle">액체비료</div><div class="csub">식물 4개</div></div><div class="card" onclick="go('s-alb-grp');setAlbGrp(3)"><div class="badge bg3">그룹 3</div><div class="ctitle">고체비료</div><div class="csub">식물 4개</div></div></div></div>
+<div id="s-alb-grp" class="screen"><div class="hdr"><button class="back" onclick="go('s-album')"><svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M19 12H5M12 5l-7 7 7 7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg> 식물 앨범</button><span class="ptitle" id="alb-grp-title">그룹 식물</span></div><div class="plant-grid" id="plant-card-grid"></div></div>
+<div id="s-alb-plant" class="screen"><div class="hdr"><button class="back" onclick="go('s-alb-grp')"><svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M19 12H5M12 5l-7 7 7 7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg> 그룹</button><span class="ptitle" id="alb-plant-title">식물 앨범</span></div><div class="sort-bar"><button class="sort-btn on" id="sort-new" onclick="setSort('new')">최신순</button><button class="sort-btn" id="sort-old" onclick="setSort('old')">오래된순</button></div><div id="album-list"></div></div>
+
+<!-- 공유 -->
+<div id="s-share" class="screen"><div class="hdr"><button class="back" onclick="go('s-home')"><svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M19 12H5M12 5l-7 7 7 7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg> 홈</button><span class="ptitle">공유</span></div><p class="sec-label">날짜 선택</p><div style="display:flex;flex-direction:column;gap:10px" id="share-day-list"></div></div>
+<div id="s-share-detail" class="screen">
+  <div class="hdr"><button class="back" onclick="go('s-share')"><svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M19 12H5M12 5l-7 7 7 7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg> 날짜 선택</button><span class="ptitle" id="share-detail-title">공유 카드</span></div>
+  <div class="tab-bar"><button class="tab-btn on" id="tab-summary" onclick="switchTab('summary')">요약 카드</button><button class="tab-btn" id="tab-photo" onclick="switchTab('photo')">사진 카드</button></div>
+  <div id="view-summary">
+    <div class="share-card"><div class="card-hdr"><div class="card-hdr-title" id="sc-date"></div><div class="card-hdr-sub" id="sc-sub"></div></div><div class="summary-band"><div style="font-size:11px;color:#3B6D11;font-weight:500;margin-bottom:5px;letter-spacing:.03em">오늘의 요약</div><div style="font-size:12px;color:#2C2C2A;line-height:1.6" id="sc-summary"></div></div><div style="padding:12px 16px"><div style="font-size:11px;color:#444;font-weight:500;margin-bottom:8px;letter-spacing:.03em">그룹별 현황</div><div id="sc-groups"></div></div><div class="card-footer"><span class="footer-txt">백일홍 비료 실험 관찰 일지</span><span class="footer-txt">by 관찰일지 앱</span></div></div>
+    <button class="share-btn btn-green" onclick="copyText()">텍스트 복사 (카톡 붙여넣기용)</button>
+    <button class="share-btn btn-outline" onclick="alert('사진은 관찰 기록에서 직접 촬영/선택하여 저장하세요!')">이미지 저장</button>
+    <div class="copy-msg" id="copy-msg">복사되었어요! 카톡에 붙여넣기 하세요.</div>
+  </div>
+  <div id="view-photo" style="display:none">
+    <div class="share-card"><div class="card-hdr"><div class="card-hdr-title" id="pc-date"></div><div class="card-hdr-sub">식물별 사진 기록</div></div><div style="padding:10px 12px 0"><div style="display:grid;grid-template-columns:repeat(3,1fr);gap:2px;margin-bottom:4px"><div class="photo-col-hdr" style="color:#3B6D11">그룹1 무비료</div><div class="photo-col-hdr" style="color:#185FA5">그룹2 액체비료</div><div class="photo-col-hdr" style="color:#854F0B">그룹3 고체비료</div></div></div><div class="photo-grid" id="photo-grid"></div><div class="card-footer"><span class="footer-txt">백일홍 비료 실험 관찰 일지</span><span class="footer-txt">by 관찰일지 앱</span></div></div>
+    <button class="share-btn btn-outline" onclick="alert('사진은 관찰 기록에서 직접 촬영/선택하여 저장하세요!')">이미지 저장</button>
+  </div>
+</div>
+
+<script>
+var DB={},curPot='',curGroup='',curPlantAB='',curWkGrp=1,curAlbPlant='',curSort='new',curDi=0;
+/* window에 전역 노출 - localStorage 연동용 */
+window.DB=DB;
+var DAYS=[];
+var DAY_DATES=[];
+var WEEKS=[];
+var PLANTS=['1-1-a','1-1-b','1-2-a','1-2-b','2-1-a','2-1-b','2-2-a','2-2-b','3-1-a','3-1-b','3-2-a','3-2-b'];
+function grpPlants(g){if(g==1)return['1-1-a','1-1-b','1-2-a','1-2-b'];if(g==2)return['2-1-a','2-1-b','2-2-a','2-2-b'];return['3-1-a','3-1-b','3-2-a','3-2-b'];}
+PLANTS.forEach(function(p){DB[p]={};});
+
+function calcDayAvg(g,di){
+  var pts=grpPlants(g),h=0,l=0,cnt=0;
+  var dd=DAY_DATES[di];
+  var dk=dd?dd.m+'_'+dd.d:String(di);
+  pts.forEach(function(p){
+    var rec=DB[p]&&(DB[p][dk]||DB[p][di]);
+    if(rec&&rec.height!==null){h+=rec.height;l+=rec.leafCount||0;cnt++;}
+  });
+  if(cnt===0) return{avgH:0,avgL:0};
+  return{avgH:Math.round(h/cnt*10)/10,avgL:Math.round(l/cnt*10)/10};
+}
+function calcDayState(g,di){
+  var pts=grpPlants(g),lm={},sm={},fm={없음:0,꽃봉오리:0,개화:0};
+  var dd=DAY_DATES[di];
+  var dk=dd?dd.m+'_'+dd.d:String(di);
+  pts.forEach(function(p){
+    var rec=DB[p]&&(DB[p][dk]||DB[p][di]);
+    if(!rec||rec.height===null) return;
+    if(rec.leafState){lm[rec.leafState]=(lm[rec.leafState]||0)+1;}
+    if(rec.stemState){sm[rec.stemState]=(sm[rec.stemState]||0)+1;}
+    if(rec.flowerState){fm[rec.flowerState]=(fm[rec.flowerState]||0)+1;}
+  });
+  return{leafMap:lm,stemMap:sm,flower:fm};
+}
+function calcGroupWeekAvg(g,wd){return wd.map(function(_,di){return calcDayAvg(g,di);});}
+function calcStateWeek(g,wd){var pts=grpPlants(g),lm={},sm={},fm={없음:0,꽃봉오리:0,개화:0};pts.forEach(function(p){wd.forEach(function(_,di){var d=DB[p][di];lm[d.leafState]=(lm[d.leafState]||0)+1;sm[d.stemState]=(sm[d.stemState]||0)+1;fm[d.flowerState]=(fm[d.flowerState]||0)+1;});});var lM=Object.keys(lm).sort(function(a,b){return lm[b]-lm[a];})[0],sM=Object.keys(sm).sort(function(a,b){return sm[b]-sm[a];})[0];return{leafMap:lm,stemMap:sm,leafMode:lM,stemMode:sM,flower:fm};}
+function makeLineChart(labels,datasets){var W=320,H=130,px=30,py=15,pb=25,pr=10,cW=W-px-pr,cH=H-py-pb;var allV=[].concat.apply([],datasets.map(function(d){return d.data;}));var minV=Math.min.apply(null,allV)*0.9,maxV=Math.max.apply(null,allV)*1.1;function tx(i){return px+i*(cW/(labels.length-1));}function ty(v){return py+cH-(v-minV)/(maxV-minV)*cH;}var cols=['#1D9E75','#378ADD','#BA7517'];var s='<svg width="100%" viewBox="0 0 '+W+' '+H+'" style="overflow:visible">';for(var g=0;g<=3;g++){var gy=py+g*(cH/3),gv=Math.round((maxV-(g*(maxV-minV)/3))*10)/10;s+='<line x1="'+px+'" y1="'+gy+'" x2="'+(W-pr)+'" y2="'+gy+'" stroke="#e8e8e6" stroke-width="0.5"/><text x="'+(px-4)+'" y="'+gy+'" font-size="9" fill="#aaa" text-anchor="end" dominant-baseline="central">'+gv+'</text>';}labels.forEach(function(l,i){s+='<text x="'+tx(i)+'" y="'+(H-3)+'" font-size="9" fill="#888" text-anchor="middle">'+l.split('(')[0]+'</text>';});datasets.forEach(function(ds,di){var col=cols[di],pts=ds.data.map(function(v,i){return tx(i)+','+ty(v);}).join(' ');s+='<polyline points="'+pts+'" fill="none" stroke="'+col+'" stroke-width="1.5"/>';ds.data.forEach(function(v,i){s+='<circle cx="'+tx(i)+'" cy="'+ty(v)+'" r="3" fill="'+col+'"/>';});});return s+'</svg>';}
+function renderWkDetail(g,wo){var st=calcGroupWeekAvg(g,wo.days),si=calcStateWeek(g,wo.days);var hC=makeLineChart(wo.days,[{data:st.map(function(s){return s.avgH;})}]),lC=makeLineChart(wo.days,[{data:st.map(function(s){return s.avgL;})}]);var f=si.flower,fT=f['개화']>0?'개화 '+f['개화']+'개':f['꽃봉오리']>0?'꽃봉오리 '+f['꽃봉오리']+'개':'없음';var lT=Object.keys(si.leafMap).map(function(k){return k+' '+si.leafMap[k]+'회';}).join(', '),sT=Object.keys(si.stemMap).map(function(k){return k+' '+si.stemMap[k]+'회';}).join(', ');return'<div class="wkcard"><div class="wktitle">평균 키 변화 (cm)</div>'+hC+'</div><div class="wkcard"><div class="wktitle">평균 잎수 변화</div>'+lC+'</div><div class="wkcard"><div class="wktitle">일별 평균 데이터</div><table style="width:100%;font-size:12px;border-collapse:collapse"><tr style="border-bottom:1px solid #f0f0ee"><th style="text-align:left;padding:4px 0;font-weight:500;color:#888">날짜</th><th style="text-align:right;padding:4px 0;font-weight:500;color:#888">평균 키</th><th style="text-align:right;padding:4px 0;font-weight:500;color:#888">평균 잎수</th></tr>'+wo.days.map(function(day,di){return'<tr style="border-bottom:1px solid #f0f0ee"><td style="padding:5px 0;color:#888">'+day+'</td><td style="text-align:right;padding:5px 0">'+st[di].avgH+'cm</td><td style="text-align:right;padding:5px 0">'+st[di].avgL+'개</td></tr>';}).join('')+'</table></div><div class="wkcard"><div class="wktitle">상태 요약</div><div class="statrow"><span class="statlabel">잎 상태 (최빈)</span><span class="statval">'+si.leafMode+'</span></div><div class="statrow"><span class="statlabel">잎 상태 분포</span><span class="statval" style="font-size:11px">'+lT+'</span></div><div class="statrow"><span class="statlabel">줄기 상태 (최빈)</span><span class="statval">'+si.stemMode+'</span></div><div class="statrow"><span class="statlabel">꽃/싹 상태</span><span class="statval">'+fT+'</span></div></div>';}
+function renderTotalDetail(wo){var aS=[1,2,3].map(function(g){return calcGroupWeekAvg(g,wo.days);}),aSi=[1,2,3].map(function(g){return calcStateWeek(g,wo.days);});var cols=['#1D9E75','#378ADD','#BA7517'],nms=['무비료','액체비료','고체비료'];var hDS=[0,1,2].map(function(gi){return{data:aS[gi].map(function(s){return s.avgH;})};});var lDS=[0,1,2].map(function(gi){return{data:aS[gi].map(function(s){return s.avgL;})};});function lSc(lm){return(lm['정상']||0)*2-(lm['갈색']||0)*2-(lm['연한 노랑']||0);}var lS=[0,1,2].map(function(gi){return lSc(aSi[gi].leafMap);}),mxL=Math.max.apply(null,lS),allSm=lS.every(function(s){return s===lS[0];});var bL=allSm?'모두 동일 ('+nms.join(', ')+')': [0,1,2].filter(function(gi){return lS[gi]===mxL;}).map(function(gi){return nms[gi];}).join(', ');var bC=[0,1,2].map(function(gi){return aSi[gi].flower['꽃봉오리']||0;}),mxB=Math.max.apply(null,bC),bBud=mxB===0?'아직 없음':[0,1,2].filter(function(gi){return bC[gi]===mxB;}).map(function(gi){return nms[gi];}).join(', ')+(mxB>0?' ('+mxB+'개)':'');var oC=[0,1,2].map(function(gi){return aSi[gi].flower['개화']||0;}),mxO=Math.max.apply(null,oC),bO=mxO===0?null:[0,1,2].filter(function(gi){return oC[gi]===mxO;}).map(function(gi){return nms[gi];}).join(', ')+' ('+mxO+'개)';return'<div class="wkcard"><div class="wktitle">평균 키 비교 (cm)</div><div class="legend">'+nms.map(function(n,i){return'<div class="leg-item"><div class="leg-dot" style="background:'+cols[i]+'"></div>'+n+'</div>';}).join('')+'</div>'+makeLineChart(wo.days,hDS)+'</div><div class="wkcard"><div class="wktitle">평균 잎수 비교</div><div class="legend">'+nms.map(function(n,i){return'<div class="leg-item"><div class="leg-dot" style="background:'+cols[i]+'"></div>'+n+'</div>';}).join('')+'</div>'+makeLineChart(wo.days,lDS)+'</div><div class="wkcard"><div class="wktitle">그룹 순위</div><div class="rank-card r-green">잎 상태 최우수: '+bL+'</div><div class="rank-card r-blue">꽃봉오리 최다: '+bBud+'</div><div class="rank-card '+(bO?'r-amber':'r-purple')+'">개화 최다: '+(bO||'아직 없음')+'</div></div>';}
+function renderWeekList(cid,g,dScr,tEl,bEl){
+  var el=document.getElementById(cid);
+  if(!el) return;
+  el.innerHTML='';
+  if(WEEKS.length===0){
+    el.innerHTML='<div style="text-align:center;padding:1.5rem;color:var(--text-light);font-size:13px">아직 주간 데이터가 없어요.</div>';
+    return;
+  }
+  WEEKS.forEach(function(w){
+    var btn=document.createElement('div');btn.className='card';
+    btn.innerHTML='<div class="ctitle">'+w.label+'</div>';
+    btn.onclick=function(){
+      document.getElementById(tEl).innerText=(g?'그룹'+g+' ':'')+w.label;
+      document.getElementById(bEl).innerHTML=g?renderWkDetail(g,w):renderTotalDetail(w);
+      go(dScr);
+    };
+    el.appendChild(btn);
+  });
+}
+function detectEvents(){
+  var ev=[],gCl={1:'ev1',2:'ev2',3:'ev3'},gNm={1:'그룹1(무비료)',2:'그룹2(액체비료)',3:'그룹3(고체비료)'};
+  [1,2,3].forEach(function(g){
+    var pts=grpPlants(g);
+    for(var di=0;di<DAY_DATES.length;di++){
+      if(pts.some(function(p){return DB[p]&&DB[p][di]&&DB[p][di].leafCount>0;})){
+        ev.push({di:di,cls:gCl[g],text:gNm[g]+' · 첫 잎 관찰: '+(DAYS[di]||''),grp:g});break;
+      }
+    }
+    for(var di=0;di<DAY_DATES.length;di++){
+      if(pts.some(function(p){return DB[p]&&DB[p][di]&&DB[p][di].flowerState==='꽃봉오리';})){
+        ev.push({di:di,cls:gCl[g],text:gNm[g]+' · 첫 꽃봉오리: '+(DAYS[di]||''),grp:g});break;
+      }
+    }
+    for(var di=0;di<DAY_DATES.length;di++){
+      if(pts.some(function(p){return DB[p]&&DB[p][di]&&DB[p][di].flowerState==='개화';})){
+        ev.push({di:di,cls:gCl[g],text:gNm[g]+' · 첫 개화: '+(DAYS[di]||''),grp:g});break;
+      }
+    }
+  });
+  return ev;
+}
+function renderMainCal(screenId){
+  var isHome = screenId==='s-home';
+  var eventsElId = isHome?'home-cal-events':'cal-events';
+  var monthsElId = isHome?'home-cal-months':'cal-months';
+  renderCalInto(eventsElId, monthsElId);
+}
+function renderCal(){renderCalInto('cal-events','cal-months');}
+function renderCalInto(eventsElId, monthsElId){
+  var ev=detectEvents(),evEl=document.getElementById(eventsElId);
+  if(evEl){
+    var starSvg='<svg width="12" height="12" viewBox="0 0 24 24" fill="none"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg>';
+    var evHtml='<div class="events-section"><div class="events-title">'+starSvg+' Special Events of this Month</div>';
+    if(ev.length){evHtml+=ev.map(function(e){return'<div class="event-item '+e.cls+'">'+e.text+'</div>';}).join('');}
+    else{evHtml+='<div style="font-size:12px;color:var(--tl);padding:4px 0">아직 이벤트가 없어요</div>';}
+    evHtml+='</div>';
+    evEl.innerHTML=evHtml;
+  }
+  var evDM={};ev.forEach(function(e){var dd=DAY_DATES[e.di],k=dd.m+'-'+dd.d;if(!evDM[k])evDM[k]=[];evDM[k].push(e);});
+  var rD={};DAY_DATES.forEach(function(dd){rD[dd.m+'-'+dd.d]=true;});
+  var mEl=document.getElementById(monthsElId);if(!mEl)return;
+  curCalMonthsElId=monthsElId;
+
+  var mo=calViewMonth,yr=calViewYear;
+  var fd=new Date(yr,mo-1,1).getDay(),dim=new Date(yr,mo,0).getDate();
+  var mN=['1월','2월','3월','4월','5월','6월','7월','8월','9월','10월','11월','12월'];
+
+  /* 월 이동 헤더 DOM으로 생성 */
+  mEl.innerHTML='';
+  var navDiv=document.createElement('div');
+  navDiv.style.cssText='display:flex;align-items:center;justify-content:space-between;margin-bottom:14px';
+  var btnPrev=document.createElement('button');
+  btnPrev.textContent='◀';
+  btnPrev.style.cssText='background:var(--green-bg);border:1px solid var(--border);border-radius:8px;padding:5px 12px;font-size:14px;cursor:pointer;color:var(--green-deep)';
+  btnPrev.onclick=function(){moveCalMonth(-1);};
+  var titleSpan=document.createElement('span');
+  titleSpan.style.cssText='font-size:15px;font-weight:700;color:var(--text-dark)';
+  titleSpan.textContent=yr+'년 '+mN[mo-1];
+  var btnNext=document.createElement('button');
+  btnNext.textContent='▶';
+  btnNext.style.cssText='background:var(--green-bg);border:1px solid var(--border);border-radius:8px;padding:5px 12px;font-size:14px;cursor:pointer;color:var(--green-deep)';
+  btnNext.onclick=function(){moveCalMonth(1);};
+  navDiv.appendChild(btnPrev);navDiv.appendChild(titleSpan);navDiv.appendChild(btnNext);
+  mEl.appendChild(navDiv);
+
+  /* 8열 그리드 HTML */
+  var html='<div class="cal-grid8">';
+  ['일','월','화','수','목','금','토',''].forEach(function(d){html+='<div class="cal-dow">'+d+'</div>';});
+  for(var i=0;i<fd;i++) html+='<div class="cal-day empty"></div>';
+
+  var colIdx=fd;
+  for(var d=1;d<=dim;d++){
+    var k=mo+'-'+d,hasR=!!rD[k],evs=evDM[k]||[];
+    var cls='cal-day'+(hasR?' has-rec':'');
+    var td=new Date();
+    if(d===td.getDate()&&mo===td.getMonth()+1&&yr===td.getFullYear()) cls+=' today';
+    var recBadge=hasR?'<span class="rec-badge">기록완료</span>':'';
+    var evDotsHtml=evs.length>0?'<div class="event-dots-row">'+evs.map(function(e){var ec=e.grp===1?'#2d9b5f':e.grp===2?'#378ADD':'#BA7517';return'<span class="event-dot" style="background:'+ec+'"></span>';}).join('')+'</div>':'';
+    var dv='null';DAY_DATES.forEach(function(dd,idx){if(dd.m===mo&&dd.d===d)dv=idx;});
+    /* 모든 날짜 클릭 가능 */
+    var ca='onclick="openDatePopup('+mo+','+d+','+dv+')" style="cursor:pointer"';
+    if(hasR) cls+='';
+    html+='<div class="'+cls+' clickable-day" '+ca+'><span class="cal-num">'+d+'</span>'+recBadge+evDotsHtml+'</div>';
+    colIdx++;
+    if(colIdx%7===0){
+      /* 모든 주에 주간분석 버튼 표시 */
+      var rowEnd=d, rowStart=d-6<1?1:d-6;
+      /* 이 행에 속하는 WEEKS 인덱스 찾기 */
+      var wkIdx=-1;
+      WEEKS.forEach(function(w,wi){w.days.forEach(function(_,wdi){var dd2=DAY_DATES[wdi];if(dd2.m===mo&&dd2.d>=rowStart&&dd2.d<=rowEnd)wkIdx=wi;});});
+      /* 날짜 범위로 직접 주간분석 버튼 생성 */
+      html+='<div class="cal-wk-btn" onclick="openWkRange('+mo+','+rowStart+','+rowEnd+','+wkIdx+')"><span>주간<br>분석</span></div>';
+      colIdx=0;
+    }
+  }
+  var remaining=(7-(colIdx%7))%7;
+  for(var i=0;i<remaining;i++) html+='<div class="cal-day empty"></div>';
+  if(remaining>0&&colIdx>0) html+='<div style="background:transparent"></div>';
+  html+='</div>';
+  var container=document.createElement('div');
+  container.className='cal-container';
+  container.innerHTML=html;
+  mEl.appendChild(container);
+}
+
+/* 월 이동 */
+var calViewMonth=3, calViewYear=2026, curCalMonthsElId='home-cal-months';
+function moveCalMonth(dir){
+  calViewMonth+=dir;
+  if(calViewMonth>12){calViewMonth=1;calViewYear++;}
+  if(calViewMonth<1){calViewMonth=12;calViewYear--;}
+  var evId=curCalMonthsElId==='home-cal-months'?'home-cal-events':'cal-events';
+  renderCalInto(evId,curCalMonthsElId);
+}
+function openDatePopup(mo,d,di){
+  curCalMo=mo; curCalD=d; curCalDi=(di===null||di==='null')?-1:parseInt(di);
+  curObsDate={m:mo,d:d};
+  obsDateIdx=curCalDi;
+  /* 팝업 타이틀 설정 */
+  var moNames=['1월','2월','3월','4월','5월','6월','7월','8월','9월','10월','11월','12월'];
+  document.getElementById('popup-title').innerText=mo+'월 '+d+'일';
+  document.getElementById('popup-date-label').innerText=mo+'월 '+d+'일'+(curCalDi>=0?' · 관찰 '+(curCalDi+1)+'일차':'');
+  go('s-date-popup');
+}
+function goToObsFromCal(){updateObsDateDisplay();go('s-obs');}
+function goToDayAnalysis(){
+  openDay(curCalMo,curCalD,curCalDi);
+}
+var curCalMo=3,curCalD=16,curCalDi=6,curObsDate={m:3,d:16};
+
+function openWkFromCal(wkIdx){
+  var w=WEEKS[wkIdx];
+  document.getElementById('total-detail-title').innerText=w.label+' 총합 분석';
+  document.getElementById('total-detail-body').innerHTML=renderTotalDetail(w);
+  go('s-wk-total-detail');
+}
+function openWkRange(mo,rowStart,rowEnd,wkIdx){
+  /* 이 주의 날짜 범위 계산 */
+  var yr=2026;
+  var label=mo+'월 '+rowStart+'일 ~ '+rowEnd+'일';
+  /* WEEKS에 있는 주차인지 확인 */
+  if(wkIdx>=0){
+    openWkFromCal(wkIdx);
+    return;
+  }
+  /* WEEKS에 없는 주 - 해당 날짜 범위의 데이터 확인 */
+  /* 그 주에 해당하는 날짜들로 임시 week 객체 생성 */
+  var tempDays=[],tempDayDates=[];
+  for(var d=rowStart;d<=rowEnd&&d<=new Date(yr,mo,0).getDate();d++){
+    var found=false;
+    DAY_DATES.forEach(function(dd,idx){if(dd.m===mo&&dd.d===d){tempDays.push(DAYS[idx]);tempDayDates.push(dd);found=true;}});
+    if(!found){tempDays.push(mo+'/'+d);tempDayDates.push({m:mo,d:d});}
+  }
+  /* 데이터가 있는지 확인 */
+  var hasAnyData=false;
+  tempDayDates.forEach(function(dd){
+    var k=dd.m+'-'+dd.d;
+    DAY_DATES.forEach(function(dd2,idx){
+      if(dd2.m===dd.m&&dd2.d===dd.d){
+        PLANTS.forEach(function(p){if(DB[p][idx].height!==null)hasAnyData=true;});
+      }
+    });
+  });
+  if(!hasAnyData){
+    document.getElementById('total-detail-title').innerText=label+' 주간 분석';
+    document.getElementById('total-detail-body').innerHTML='<div style="text-align:center;padding:2rem 1rem;color:var(--text-light)"><div style="font-size:40px;margin-bottom:1rem">🌱</div><div style="font-size:15px;font-weight:500;color:var(--text-mid);margin-bottom:8px">데이터를 입력해주세요</div><div style="font-size:13px">이 주의 관찰 기록이 아직 없어요.<br>달력에서 날짜를 선택해 기록을 시작해보세요!</div></div>';
+    go('s-wk-total-detail');
+    return;
+  }
+  var tempWk={label:label,key:'temp',days:tempDays,dayDates:tempDayDates};
+  document.getElementById('total-detail-title').innerText=label+' 주간 분석';
+  document.getElementById('total-detail-body').innerHTML=renderTotalDetail(tempWk);
+  go('s-wk-total-detail');
+}
+
+function openDay(mo,d,di){
+  document.getElementById('day-title').innerText=mo+'월 '+d+'일 하루 분석';
+  /* 데이터 없는 날짜 처리 */
+  if(di===null||di==='null'||di<0){
+    document.getElementById('day-body').innerHTML='<div style="text-align:center;padding:2.5rem 1rem;color:var(--text-light)"><div style="font-size:40px;margin-bottom:1rem">🌱</div><div style="font-size:15px;font-weight:500;color:var(--text-mid);margin-bottom:8px">데이터를 입력해주세요</div><div style="font-size:13px">'+mo+'월 '+d+'일의 관찰 기록이 아직 없어요.<br>달력에서 날짜를 선택해 기록을 시작해보세요!</div></div>';
+    go('s-day');
+    return;
+  }
+  /* 실제 데이터 있는 경우 - 데이터 존재 여부 확인 */
+  var hasData=false;
+  PLANTS.forEach(function(p){if(DB[p]&&DB[p][di]&&DB[p][di].height!==null)hasData=true;});
+  if(!hasData){
+    document.getElementById('day-body').innerHTML='<div style="text-align:center;padding:2.5rem 1rem;color:var(--text-light)"><div style="font-size:40px;margin-bottom:1rem">🌱</div><div style="font-size:15px;font-weight:500;color:var(--text-mid);margin-bottom:8px">데이터를 입력해주세요</div><div style="font-size:13px">'+mo+'월 '+d+'일의 관찰 기록이 아직 없어요.<br>달력에서 날짜를 선택해 기록을 시작해보세요!</div></div>';
+    go('s-day');
+    return;
+  }
+  var html='',gNm=['무비료','액체비료','고체비료'],gCl=['bg1','bg2','bg3'],rD=[];
+  [1,2,3].forEach(function(g,gi){
+    var avg=calcDayAvg(g,di),st=calcDayState(g,di);
+    var lT=Object.keys(st.leafMap).length?Object.keys(st.leafMap).map(function(k){return k+' '+st.leafMap[k];}).join(' · '):'기록 없음';
+    var sT=Object.keys(st.stemMap).length?Object.keys(st.stemMap).map(function(k){return k+' '+st.stemMap[k];}).join(' · '):'기록 없음';
+    var f=st.flower,fT=f['개화']>0?'개화 '+f['개화']+'개':f['꽃봉오리']>0?'꽃봉오리 '+f['꽃봉오리']+'개':'없음';
+    rD.push({g:g,name:gNm[gi],avgH:avg.avgH,avgL:avg.avgL,leafMap:st.leafMap,flower:f});
+    html+='<div class="wkcard"><div class="badge '+gCl[gi]+'">그룹 '+g+' · '+gNm[gi]+'</div><div class="metric-grid"><div class="metric"><div class="metric-label">평균 키</div><div class="metric-val">'+avg.avgH+'<span class="metric-unit">cm</span></div></div><div class="metric"><div class="metric-label">평균 잎수</div><div class="metric-val">'+avg.avgL+'<span class="metric-unit">개</span></div></div></div><div class="state-row"><span style="font-size:12px;color:var(--text-light)">잎 상태</span><span style="font-size:12px;font-weight:500">'+lT+'</span></div><div class="state-row"><span style="font-size:12px;color:var(--text-light)">줄기 상태</span><span style="font-size:12px;font-weight:500">'+sT+'</span></div><div class="state-row"><span style="font-size:12px;color:var(--text-light)">꽃/싹</span><span style="font-size:12px;font-weight:500">'+fT+'</span></div></div>';
+  });
+  var mxH=Math.max.apply(null,rD.map(function(r){return r.avgH;}));
+  var bH=rD.filter(function(r){return r.avgH===mxH;}).map(function(r){return r.name;}).join(', ');
+  function lSc(lm){return(lm['정상']||0)*2-(lm['갈색']||0)*2-(lm['연한 노랑']||0);}
+  var lS=rD.map(function(r){return lSc(r.leafMap);}),mxL=Math.max.apply(null,lS);
+  var aS=lS.every(function(s){return s===lS[0];});
+  var bL=aS?'모두 동일':rD.filter(function(r,i){return lS[i]===mxL;}).map(function(r){return r.name;}).join(', ');
+  var bC=rD.map(function(r){return r.flower['꽃봉오리']||0;}),mxB=Math.max.apply(null,bC);
+  var bBud=mxB===0?'아직 없음':rD.filter(function(r,i){return bC[i]===mxB;}).map(function(r){return r.name;}).join(', ')+(mxB>0?' ('+mxB+'개)':'');
+  var oC=rD.map(function(r){return r.flower['개화']||0;}),mxO=Math.max.apply(null,oC);
+  var bO=mxO===0?null:rD.filter(function(r,i){return oC[i]===mxO;}).map(function(r){return r.name;}).join(', ')+' ('+mxO+'개)';
+  html+='<div class="wkcard"><div class="wktitle">오늘의 순위</div><div class="rank-card r-blue">키 최대: '+bH+' ('+mxH+'cm)</div><div class="rank-card r-green">잎 상태 최우수: '+bL+'</div><div class="rank-card '+(mxB>0?'r-amber':'r-purple')+'">꽃봉오리: '+bBud+'</div>'+(bO?'<div class="rank-card r-amber">개화: '+bO+'</div>':'')+'</div>';
+  document.getElementById('day-body').innerHTML=html;
+  go('s-day');
+}
+function setAlbGrp(g){
+  var pts=grpPlants(g),gNm={1:'무비료',2:'액체비료',3:'고체비료'};
+  document.getElementById('alb-grp-title').innerText='그룹 '+g+' · '+gNm[g];
+  var grid=document.getElementById('plant-card-grid');
+  grid.innerHTML='';
+  pts.forEach(function(p){
+    /* 가장 최근 사진 찾기 - 안전하게 */
+    var lp=null;
+    if(DB[p]){
+      var keys=Object.keys(DB[p]).map(Number).sort(function(a,b){return b-a;});
+      for(var ki=0;ki<keys.length;ki++){
+        var di=keys[ki];
+        if(DB[p][di]&&DB[p][di].photo){lp=DB[p][di].photo;break;}
+      }
+    }
+    var recCount=DB[p]?Object.keys(DB[p]).filter(function(di){return DB[p][di]&&DB[p][di].height!==null;}).length:0;
+    var th=lp?'<img src="'+lp+'" style="width:100%;height:100%;object-fit:cover">':'<div style="font-size:20px;color:var(--text-light)">+</div><div class="plant-thumb-label">사진을 추가해 주세요</div>';
+    var c=document.createElement('div');
+    c.className='plant-card';
+    c.innerHTML='<div class="plant-thumb">'+th+'</div><div class="plant-card-info"><div class="plant-card-name">'+p+'</div><div class="plant-card-sub">'+(recCount>0?'기록 '+recCount+'일':'기록 없음')+'</div></div>';
+    c.onclick=function(){openAlbPlant(p);};
+    grid.appendChild(c);
+  });
+}
+function openAlbPlant(p){curAlbPlant=p;curSort='new';document.getElementById('alb-plant-title').innerText=p+' 앨범';document.getElementById('sort-new').classList.add('on');document.getElementById('sort-old').classList.remove('on');renderAlbum();go('s-alb-plant');}
+function setSort(s){curSort=s;document.getElementById('sort-new').classList.toggle('on',s==='new');document.getElementById('sort-old').classList.toggle('on',s==='old');renderAlbum();}
+function renderAlbum(){
+  var p=curAlbPlant;
+  if(!DB[p]||Object.keys(DB[p]).length===0){
+    document.getElementById('album-list').innerHTML='<div style="text-align:center;padding:2rem;color:var(--text-light);font-size:13px">아직 기록이 없어요.</div>';
+    return;
+  }
+  var indices=Object.keys(DB[p]).map(Number).filter(function(di){return DB[p][di]&&DB[p][di].height!==null;});
+  if(indices.length===0){
+    document.getElementById('album-list').innerHTML='<div style="text-align:center;padding:2rem;color:var(--text-light);font-size:13px">아직 기록이 없어요.</div>';
+    return;
+  }
+  if(curSort==='new') indices=indices.slice().sort(function(a,b){return b-a;});
+  else indices=indices.slice().sort(function(a,b){return a-b;});
+  var html='';
+  indices.forEach(function(di){
+    var d=DB[p][di];
+    var dd=DAY_DATES[di]||{m:'?',d:'?'};
+    var ds=dd.m+'월 '+dd.d+'일'+(DAYS[di]?' ('+DAYS[di].split('(')[1].replace(')','')+')'  :'');
+    var fT=(d.flowerState&&d.flowerState!=='없음')?' · '+d.flowerState:'';
+    var ph=d.photo?'<img src="'+d.photo+'" style="width:80px;height:80px;border-radius:8px;object-fit:cover">':'<div class="album-photo"><div style="font-size:18px;color:var(--text-light)">+</div><div class="album-photo-label">사진 없음</div></div>';
+    html+='<div class="album-item">'+ph+'<div class="album-info"><div class="album-date">'+ds+'</div><div class="album-stats">키 '+(d.height||'-')+'cm · 잎 '+(d.leafCount!==null?d.leafCount:'-')+'개</div><div class="album-stats">잎 상태: '+(d.leafState||'-')+'</div><div class="album-stats">줄기: '+(d.stemState||'-')+fT+'</div></div></div>';
+  });
+  document.getElementById('album-list').innerHTML=html;
+}
+function makeSummary(di){var gNm=['무비료','액체비료','고체비료'],avgs=[1,2,3].map(function(g){return calcDayAvg(g,di);});var mxH=Math.max.apply(null,avgs.map(function(a){return a.avgH;})),tG=avgs.map(function(a,i){return a.avgH===mxH?gNm[i]:null;}).filter(Boolean);var lines=[tG.join('·')+' 그룹 평균 키 '+mxH+'cm로 성장 1위.'];var bG=[];[1,2,3].forEach(function(g,gi){var st=calcDayState(g,di);if(st.flower['꽃봉오리']>0)bG.push(gNm[gi]+' 꽃봉오리 '+st.flower['꽃봉오리']+'개');});if(bG.length)lines.push(bG.join(', ')+' 첫 관찰!');var bL=[];[1,2,3].forEach(function(g,gi){var st=calcDayState(g,di);if((st.leafMap['연한 노랑']||0)>0||(st.leafMap['갈색']||0)>0)bL.push(gNm[gi]);});lines.push(bL.length?bL.join('·')+' 그룹 잎 상태 이상 관찰 중.':'전체 잎 상태 양호.');return lines.join(' ');}
+function buildDayList(){
+  var el=document.getElementById('share-day-list');
+  if(!el) return;
+  el.innerHTML='';
+  if(DAY_DATES.length===0){
+    el.innerHTML='<div style="text-align:center;padding:2rem;color:var(--text-light);font-size:13px">관찰 기록이 없어요.<br>달력에서 날짜를 선택해 기록을 시작해보세요!</div>';
+    return;
+  }
+  DAYS.forEach(function(day,di){
+    var dd=DAY_DATES[di],avg=calcDayAvg(2,di);
+    var c=document.createElement('div');c.className='card';
+    c.innerHTML='<div class="ctitle">'+dd.m+'월 '+dd.d+'일 ('+day.split('(')[1].replace(')','')+')</div><div class="csub">관찰 '+(di+1)+'일차 · 액체비료 평균 키 '+avg.avgH+'cm</div>';
+    c.onclick=function(){openShareDetail(di);};
+    el.appendChild(c);
+  });
+}
+function openShareDetail(di){curDi=di;var dd=DAY_DATES[di],ds='2026년 3월 '+dd.d+'일 ('+DAYS[di].split('(')[1].replace(')','')+')';document.getElementById('share-detail-title').innerText='3월 '+dd.d+'일 공유';document.getElementById('sc-date').innerText=ds;document.getElementById('sc-sub').innerText='관찰 '+(di+1)+'일차 · 실내온도 22°C · 햇빛 보통';document.getElementById('sc-summary').innerText=makeSummary(di);var gNm=['무비료','액체비료','고체비료'],gBg=['#f7f7f6','#f0f7ff','#fffaf0'],gBd=['#1D9E75','#378ADD','#BA7517'],gNc=['#27500A','#0C447C','#633806'],gH='';[1,2,3].forEach(function(g,gi){var avg=calcDayAvg(g,di),st=calcDayState(g,di);var lT=Object.keys(st.leafMap).map(function(k){return k+' '+st.leafMap[k];}).join('·'),fT=st.flower['개화']>0?'개화 '+st.flower['개화']+'개!':st.flower['꽃봉오리']>0?'꽃봉오리 '+st.flower['꽃봉오리']+'개!':'';gH+='<div class="grp-row" style="background:'+gBg[gi]+';border-left:3px solid '+gBd[gi]+'"><div><div class="grp-name" style="color:'+gNc[gi]+'">그룹 '+g+' · '+gNm[gi]+'</div><div class="grp-sub">'+(fT||'잎 상태: '+lT)+'</div></div><div class="grp-val">'+avg.avgH+'<span style="font-size:11px;font-weight:400;color:#888">cm</span><div class="grp-val-sub">잎 '+avg.avgL+'개 평균</div></div></div>';});document.getElementById('sc-groups').innerHTML=gH;document.getElementById('pc-date').innerText=ds;var rows=[['1-1-a','2-1-a','3-1-a'],['1-1-b','2-1-b','3-1-b'],['1-2-a','2-2-a','3-2-a'],['1-2-b','2-2-b','3-2-b']],pgH='';rows.forEach(function(row){row.forEach(function(p){var d=DB[p][di];pgH+=d.photo?'<div class="photo-cell" style="padding:0"><img src="'+d.photo+'" style="width:100%;height:100%;object-fit:cover;border-radius:6px"></div>':'<div class="photo-cell"><div style="font-size:14px;color:#ccc">+</div><div>'+p+'</div></div>';});});document.getElementById('photo-grid').innerHTML=pgH;switchTab('summary');go('s-share-detail');}
+function switchTab(t){document.getElementById('tab-summary').classList.toggle('on',t==='summary');document.getElementById('tab-photo').classList.toggle('on',t==='photo');document.getElementById('view-summary').style.display=t==='summary'?'block':'none';document.getElementById('view-photo').style.display=t==='photo'?'block':'none';}
+function copyText(){var di=curDi,dd=DAY_DATES[di],gNm=['무비료','액체비료','고체비료'],avgs=[1,2,3].map(function(g){return calcDayAvg(g,di);}),sts=[1,2,3].map(function(g){return calcDayState(g,di);});var lines=['🌱 백일홍 관찰 일지 - 2026년 3월 '+dd.d+'일 (관찰 '+(di+1)+'일차)','─────────────────────','📋 오늘의 요약',makeSummary(di),'','📊 그룹별 현황'];[0,1,2].forEach(function(gi){var avg=avgs[gi],st=sts[gi],lT=Object.keys(st.leafMap).map(function(k){return k+' '+st.leafMap[k];}).join('·'),fT=st.flower['꽃봉오리']>0?' · 꽃봉오리 '+st.flower['꽃봉오리']+'개':st.flower['개화']>0?' · 개화 '+st.flower['개화']+'개':'';lines.push('그룹'+(gi+1)+' ('+gNm[gi]+'): 평균 키 '+avg.avgH+'cm · 잎 '+avg.avgL+'개'+fT+' · 잎상태 '+lT);});lines.push('─────────────────────','백일홍 비료 실험 관찰 일지');navigator.clipboard.writeText(lines.join('\n')).then(function(){var m=document.getElementById('copy-msg');m.style.display='block';function debugStorage(){
+  var area = document.getElementById('debug-area');
+  if(!area){alert('debug-area 없음');return;}
+  area.style.display='block';
+  var raw = localStorage.getItem('zinnia_db');
+  if(!raw){
+    area.innerHTML='<span style="color:red">❌ 저장 안됨</span>';
+    return;
+  }
+  try{
+    var data=JSON.parse(raw);
+    var cnt=0;
+    Object.keys(data.DB||{}).forEach(function(p){
+      Object.keys(data.DB[p]).forEach(function(dk){
+        if(data.DB[p][dk]&&data.DB[p][dk].height!==null)cnt++;
+      });
+    });
+    area.innerHTML='<span style="color:green">✅ 저장됨! 날짜:'+(data.DAY_DATES||[]).length+'개 기록:'+cnt+'개</span>';
+  }catch(e){area.innerHTML='<span style="color:orange">⚠️ '+e.message+'</span>';}
+}
+
+setTimeout(function(){m.style.display='none';},2500);});}
+function go(id){document.querySelectorAll('.screen').forEach(function(s){s.classList.remove('active');});document.getElementById(id).classList.add('active');if(id==='s-cal'||id==='s-home')renderMainCal(id);}
+function sel(btn,g){btn.closest('.sgrp').querySelectorAll('.sbtn').forEach(function(b){b.classList.remove('on');});btn.classList.add('on');}
+function setW(t){document.getElementById('wno').classList.toggle('on',t==='no');document.getElementById('wyes').classList.toggle('on',t==='yes');document.getElementById('spray').style.display=t==='yes'?'flex':'none';}
+function setPot(pot,grp,back){curPot=pot;curGroup=grp;document.getElementById('pot-title').innerText='화분 '+pot.split('-')[1]+' · '+grp;document.getElementById('pa-name').innerText=pot+'-a';document.getElementById('pb-name').innerText=pot+'-b';document.getElementById('pot-back').onclick=function(){go(back);};}
+function setPlant(ab){curPlantAB=ab;var key=curPot+'-'+ab;document.getElementById('plant-title').innerText=key+' 기록';var d=DB[key]?DB[key][obsDateIdx]:null;if(d){document.getElementById('p-height').value=d.height;var lc=d.leafCount!=null?d.leafCount:0;document.getElementById('leaf-sl').value=Math.min(lc,10);document.getElementById('leaf-v').innerText=Math.min(lc,10);document.querySelectorAll('#sg-leaf .sbtn').forEach(function(b){b.classList.toggle('on',b.innerText===d.leafState);});document.querySelectorAll('#sg-stem .sbtn').forEach(function(b){b.classList.toggle('on',b.innerText===d.stemState);});document.querySelectorAll('#sg-flower .sbtn').forEach(function(b){b.classList.toggle('on',b.innerText===d.flowerState);});}}
+function toggleLeafOther(c){document.getElementById('leaf-other-in').style.display=c?'inline-block':'none';document.getElementById('leaf-sl').disabled=c;}
+function getDateKey(){
+  if(curObsDate&&curObsDate.m&&curObsDate.d) return curObsDate.m+'_'+curObsDate.d;
+  var now=new Date(); return (now.getMonth()+1)+'_'+now.getDate();
+}
+function saveInput(){
+  var key=curPot+'-'+curPlantAB;
+  if(!key||key==='-') return;
+  var dk=getDateKey();
+  if(!DB[key]) DB[key]={};
+  var prev=DB[key][dk]||{};
+  var h=parseFloat(document.getElementById('p-height').value)||prev.height||null;
+  var lc=document.getElementById('leaf-other').checked?
+    parseInt(document.getElementById('leaf-other-in').value)||prev.leafCount||0:
+    parseInt(document.getElementById('leaf-sl').value);
+  var ls='정상',ss='정상',fs='없음';
+  document.querySelectorAll('#sg-leaf .sbtn.on').forEach(function(b){ls=b.innerText;});
+  document.querySelectorAll('#sg-stem .sbtn.on').forEach(function(b){ss=b.innerText;});
+  document.querySelectorAll('#sg-flower .sbtn.on').forEach(function(b){fs=b.innerText;});
+  DB[key][dk]={height:h,leafCount:lc,leafState:ls,stemState:ss,flowerState:fs,
+    photo:prev.photo||null,dateM:curObsDate?curObsDate.m:null,dateD:curObsDate?curObsDate.d:null};
+  /* DAY_DATES에 날짜 등록 */
+  if(curObsDate&&curObsDate.m&&curObsDate.d){
+    var found=false;
+    DAY_DATES.forEach(function(dd){if(dd.m===curObsDate.m&&dd.d===curObsDate.d)found=true;});
+    if(!found){
+      DAY_DATES.push({m:curObsDate.m,d:curObsDate.d});
+      DAY_DATES.sort(function(a,b){return a.m!==b.m?a.m-b.m:a.d-b.d;});
+      DAYS.length=0;
+      DAY_DATES.forEach(function(dd){DAYS.push(dd.m+'/'+dd.d);});
+      rebuildWeeks();
+    }
+  }
+  if(window.saveToStorage) window.saveToStorage();
+}
+function saveCommon(){
+  var temp = document.getElementById('c-temp');
+  var sunBtn = document.querySelector('#s-common .sbtn.on');
+  var waterNo = document.getElementById('wno');
+  var waterYes = document.getElementById('wyes');
+  var sprayVal = document.getElementById('spray-v');
+  var note = document.querySelector('#s-common textarea');
+  var di = obsDateIdx<0?0:obsDateIdx;
+  var dd = DAY_DATES[di];
+  var data = {
+    temp: temp?temp.value:'',
+    sun: sunBtn?sunBtn.innerText:'',
+    water: waterNo&&waterNo.classList.contains('on')?'안줌':'분무기로 '+(sprayVal?sprayVal.innerText:'')+'번',
+    note: note?note.value:''
+  };
+  if(dd){ data.dateM=dd.m; data.dateD=dd.d; }
+  try {
+    var commonSaved = JSON.parse(localStorage.getItem(COMMON_KEY)||'{}');
+    commonSaved['day_'+di] = data;
+    localStorage.setItem('zinnia_common', JSON.stringify(commonSaved));
+    showToast('공통 기록 저장완료! ✓');
+    /* Firestore에도 동기화 */
+    var dateKey = dd ? dd.m+'_'+dd.d : 'day_'+di;
+    fsdb.collection('common').doc(dateKey).set(data)
+      .then(function(){ console.log('공통기록 Firestore 저장완료'); })
+      .catch(function(e){ console.error('공통기록 Firestore 실패:', e); });
+  } catch(e) { showToast('저장되었어요! ✓'); }
+}
+function handlePhotoSelect(input) {
+  if(!input.files||!input.files[0]) return;
+  var file = input.files[0];
+  var key = curPot+'-'+curPlantAB;
+  var di = obsDateIdx<0?0:obsDateIdx;
+  /* 미리보기 */
+  var reader = new FileReader();
+  reader.onload = function(e) {
+    var prev = document.getElementById('photo-preview');
+    var img = document.getElementById('photo-preview-img');
+    if(prev&&img){ prev.style.display='block'; img.src=e.target.result; }
+  };
+  reader.readAsDataURL(file);
+  /* Canvas 리사이즈 → Base64 저장 */
+  var status = document.getElementById('photo-upload-status');
+  if(status) status.textContent = '사진 처리 중...';
+  var dk = getDateKey();
+  if(window.uploadPhoto) {
+    window.uploadPhoto(file, key, di).then(function(base64){
+      if(base64) {
+        if(!DB[key]) DB[key]={};
+        if(!DB[key][dk]) DB[key][dk]={height:null,leafCount:null,leafState:null,stemState:null,flowerState:null,photo:null};
+        DB[key][dk].photo = base64;
+        if(window.saveToStorage)window.saveToStorage();
+        if(window.syncToFirestore)window.syncToFirestore();
+        if(status) status.textContent = '사진 저장 완료 ✓';
+        showToast('사진 저장 완료!');
+      } else {
+        if(status) status.textContent = '사진 처리 실패. 다시 시도해주세요.';
+      }
+    });
+  } else {
+    if(status) status.textContent = '업로드 기능 준비 중...';
+  }
+}
+function confirmSave(){
+  saveInput();
+  window.saveToStorage();
+  if(window.syncToFirestore) window.syncToFirestore();
+  renderMainCal('s-home');
+  showToast('저장되었어요! ✓');
+}
+
+function showToast(msg) {
+  var t = document.getElementById('toast');
+  if(!t) {
+    t = document.createElement('div');
+    t.id = 'toast';
+    t.style.cssText = 'position:fixed;bottom:80px;left:50%;transform:translateX(-50%);background:var(--g1);color:#fff;padding:10px 20px;border-radius:20px;font-size:13px;font-weight:600;z-index:9999;opacity:0;transition:opacity .3s;pointer-events:none;max-width:280px;text-align:center';
+    document.body.appendChild(t);
+  }
+  t.textContent = msg;
+  t.style.opacity = '1';
+  setTimeout(function(){ t.style.opacity='0'; }, 2500);
+}
+
+function rebuildWeeks() {
+  /* DAY_DATES를 7일 단위 주차로 자동 구성 */
+  window.WEEKS = [];
+  if(window.DAY_DATES.length === 0) return;
+  var sorted = window.DAY_DATES.slice().sort(function(a,b){ return a.m!==b.m?a.m-b.m:a.d-b.d; });
+  var i = 0;
+  while(i < sorted.length) {
+    var chunk = sorted.slice(i, i+7);
+    var first = chunk[0], last = chunk[chunk.length-1];
+    var label = first.m+'/'+first.d+' ~ '+last.m+'/'+last.d;
+    var wNum = Math.floor(i/7)+1;
+    var days = chunk.map(function(dd){ return dd.m+'/'+dd.d; });
+    window.WEEKS.push({label: wNum+'주차 ('+label+')', key:'w'+wNum, days:days, dayDates:chunk});
+    i += 7;
+  }
+}
+function setWkGrp(g){curWkGrp=g;var nm=g==1?'무비료':g==2?'액체비료':'고체비료';document.getElementById('wkgrp-title').innerText='그룹 '+g+' ('+nm+') 분석';renderWeekList('week-list',g,'s-wk-detail','wkdetail-title','wk-detail-body');}
+document.getElementById('today-lbl').innerText=(function(){var d=new Date();return d.getFullYear()+'년 '+(d.getMonth()+1)+'월 '+d.getDate()+'일';})();
+setTimeout(function(){
+  var now=new Date();
+  calViewMonth=now.getMonth()+1;
+  calViewYear=now.getFullYear();
+
+  function renderAll(){
+    renderWeekList('total-week-list',null,'s-wk-total-detail','total-detail-title','total-detail-body');
+    buildDayList();
+    initObsDate();
+    renderMainCal('s-home');
+  }
+
+  /* 1) localStorage 즉시 로드 (빠른 표시) */
+  if(window.loadFromLocalStorage) window.loadFromLocalStorage();
+  renderAll();
+
+  /* 2) Firestore 비동기 로드 (최신 데이터 덮어쓰기) */
+  if(window.loadFromFirestore){
+    window.loadFromFirestore().then(function(){
+      renderAll();
+      /* Firestore 데이터를 localStorage에도 캐시 */
+      if(window.saveToStorage) window.saveToStorage();
+    }).catch(function(e){
+      console.log('Firestore 로드 실패, localStorage 데이터 사용:', e);
+    });
+  }
+},100);
+
+/* ── 관찰 기록 날짜 선택 ── */
+var obsDateIdx = 6; /* 기본: 마지막 날(3/16) */
+function initObsDate(){
+  updateObsDateDisplay();
+}
+function changeObsDate(dir){
+  var next = obsDateIdx + dir;
+  if(next < 0 || next >= DAY_DATES.length) return;
+  obsDateIdx = next;
+  updateObsDateDisplay();
+}
+function updateObsDateDisplay(){
+  if(obsDateIdx<0||obsDateIdx>=DAY_DATES.length){
+    /* 범위 밖 날짜 - curObsDate 사용 */
+    var d=curObsDate||{m:calViewMonth,d:1};
+    document.getElementById('obs-date-display').innerText=
+      d.m+'월 '+d.d+'일';
+    document.getElementById('obs-date-sub').innerText='';
+      return;
+  }
+  var dd = DAY_DATES[obsDateIdx];
+  var dayName = DAYS[obsDateIdx];
+  var isToday = (obsDateIdx === DAY_DATES.length - 1);
+  document.getElementById('obs-date-display').innerText =
+    '2026년 3월 ' + dd.d + '일 (' + dayName.split('(')[1].replace(')','') + ')';
+  document.getElementById('obs-date-sub').innerText =
+    '관찰 ' + (obsDateIdx + 1) + '일차' + (isToday ? ' · 오늘' : '');
+
+}
+</script>
+
+<!-- 중복 localStorage 코드 제거됨 — Firestore + localStorage 로직은 상단 <head>에서 관리 -->
+</body>
+</html>
